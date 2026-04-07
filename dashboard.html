@@ -36,7 +36,10 @@ function save(){
   const status = document.getElementById("status").value;
 
   db.collection("shipments").doc(tracking).set({
-    status: status
+    status: status,
+    sender: "Fastline Logistics",
+    receiver: "Customer",
+    date: new Date().toLocaleString()
   });
 
   alert("Shipment saved!");
