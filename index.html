@@ -777,7 +777,394 @@
         // EDIT THIS DATA TO UPDATE TRACKING INFORMATION
         // ============================================
 
-        const trackingDatabase = {
+       // ===============================
+// REALISTIC TRACKING HANDLER
+// ===============================
+
+// Temporary local data (you will later replace with Firebase/API)
+const trackingDatabase = {
+  'FL-5326530558': { /* your existing data stays here */ },
+  'FL-1234567890': { /* your existing data stays here */ }
+};
+
+async function trackShipment() {
+  const input = document.getElementById('trackingInput');
+  const trackingNum = input.value.trim().toUpperCase();
+
+  if (!trackingNum) {
+    alert('Please enter a valid tracking number');
+    return;
+  }
+
+  // Show loading
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('trackingResult').style.display = 'none';
+
+  // Simulate server request delay (realistic)
+  setTimeout(() => {
+
+    document.getElementById('loading').style.display = 'none';
+
+    const data = trackingDatabase[trackingNum];
+
+    if (!data) {
+      showNotFound(trackingNum);
+      return;
+    }
+
+    displayTracking(data, trackingNum);
+
+  }, 1200);
+}
+            'FL-5326530558': {
+                // STATUS OPTIONS: 'delivered', 'transit', 'exception', 'pending'
+                status: 'transit',
+                statusTitle: 'In Transit',
+                statusDesc: 'Your consignment is on its way to the destination',
+
+                // SENDER INFORMATION - Edit these values
+                sender: {
+                    name: 'ANDY XIANG',
+                    reference: '01/AB/22C3/21',
+                    address: 'HOUSTON, TEXAS 77001',
+                    phone: '+1 (680) 215-7024',
+                    country: 'USA'
+                },
+
+                // RECEIVER INFORMATION - Edit these values
+                receiver: {
+                    name: 'MUI FONG NG',
+                    address: '2066 S FALCON DR, GILBERT, AZ 85295-5871',
+                    destination: 'ARIZONA',
+                    phone: '+1 (480) 524-7932',
+                    postcode: '85295'
+                },
+
+                // SHIPMENT DETAILS - Edit these values
+                shipment: {
+                    serviceType: 'EXPRESS DELIVERY',
+                    weight: '30.7 kg',
+                    pieces: '1 Box',
+                    xrayResult: 'Non-Harmful Content (Negative)',
+                    route: '00123A339'
+                },
+
+                // FACTS TABLE - Edit these values
+                facts: {
+                    shipper: 'ANDY XIANG, HOUSTON TEXAS, USA',
+                    consignee: 'MUI FONG NG, GILBERT ARIZONA, USA',
+                    origin: 'USA',
+                    destination: 'ARIZONA, USA',
+                    shipDate: 'April 6, 2026',
+                    estDelivery: 'April 8, 2026',
+                    service: 'Express Air Freight'
+                },
+
+                // TIMELINE EVENTS - Add, remove, or edit events here
+                // status options: 'completed', 'current', 'pending'
+                timeline: [
+                    {
+                        title: 'Shipment Picked Up',
+                        location: 'Houston, Texas, USA',
+                        date: 'April 6, 2026 - 09:30 AM',
+                        status: 'completed'
+                    },
+                    {
+                        title: 'Arrived at Origin Facility',
+                        location: 'Houston Distribution Center, TX',
+                        date: 'April 6, 2026 - 02:15 PM',
+                        status: 'completed'
+                    },
+                    {
+                        title: 'Departed Origin Facility',
+                        location: 'Houston, TX → Phoenix, AZ',
+                        date: 'April 6, 2026 - 08:45 PM',
+                        status: 'completed'
+                    },
+                    {
+                        title: 'In Transit',
+                        location: 'En route to Phoenix, Arizona',
+                        date: 'April 7, 2026 - 06:00 AM',
+                        status: 'current'
+                    },
+                    {
+                        title: 'Arrived at Destination Facility',
+                        location: 'Phoenix Distribution Center, AZ',
+                        date: 'Expected: April 7, 2026 - 02:00 PM',
+                        status: 'pending'
+                    },
+                    {
+                        title: 'Out for Delivery',
+                        location: 'Gilbert, Arizona',
+                        date: 'Expected: April 8, 2026 - 08:00 AM',
+                        status: 'pending'
+                    },
+                    {
+                        title: 'Delivered',
+                        location: '2066 S FALCON DR, GILBERT, AZ',
+                        date: 'Expected: April 8, 2026 - 02:00 PM',
+                        status: 'pending'
+                    }
+                ]
+            },
+
+            // Add more tracking numbers here following the same format
+            'FL-1234567890': {
+                status: 'delivered',
+                statusTitle: 'Delivered',
+                statusDesc: 'Your consignment has been delivered successfully',
+
+                sender: {
+                    name: 'JOHN SMITH',
+                    reference: 'REF-2026-001',
+                    address: 'NEW YORK, NY 10001',
+                    phone: '+1 (212) 555-0123',
+                    country: 'USA'
+                },
+
+                receiver: {
+                    name: 'JANE DOE',
+                    address: 'LOS ANGELES, CA 90001',
+                    destination: 'CALIFORNIA',
+                    phone: '+1 (310) 555-0456',
+                    postcode: '90001'
+                },
+
+                shipment: {
+                    serviceType: 'STANDARD GROUND',
+                    weight: '5.2 kg',
+                    pieces: '2 Boxes',
+                    xrayResult: 'Cleared',
+                    route: 'NY-LA-001'
+                },
+
+                facts: {
+                    shipper: 'JOHN SMITH, NEW YORK, USA',
+                    consignee: 'JANE DOE, LOS ANGELES, USA',
+                    origin: 'NEW YORK, USA',
+                    destination: 'CALIFORNIA, USA',
+                    shipDate: 'April 1, 2026',
+                    estDelivery: 'April 5, 2026',
+                    service: 'Ground Shipping'
+                },
+
+                timeline: [
+                    {
+                        title: 'Shipment Picked Up',
+                        location: 'New York, NY',
+                        date: 'April 1, 2026 - 10:00 AM',
+                        status: 'completed'
+                    },
+                    {
+                        title: 'Delivered',
+                        location: 'Los Angeles, CA',
+                        date: 'April 5, 2026 - 02:30 PM',
+                        status: 'completed'
+                    }
+                ]
+            }
+        };
+
+        // ============================================
+        // DO NOT EDIT BELOW THIS LINE (System Code)
+        // ============================================
+
+        function trackShipment() {
+            const input = document.getElementById('trackingInput');
+            const trackingNum = input.value.trim().toUpperCase();
+
+            if (!trackingNum) {
+                alert('Please enter a tracking number');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('trackingResult').style.display = 'none';
+
+            // Simulate API delay
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+
+                const data = trackingDatabase[trackingNum];
+
+                if (data) {
+                    displayTracking(data, trackingNum);
+                } else {
+                    // Generate random data for unknown numbers
+                  
+                }
+            }, 1500
+        function showNotFound(trackingNum) {
+  document.getElementById('trackingResult').style.display = 'block';
+
+  document.getElementById('statusBanner').className = 'status-banner exception';
+
+  document.getElementById('statusTitle').textContent = "Tracking Not Found";
+  document.getElementById('statusDesc').textContent = "No shipment found with this tracking number.";
+
+  document.getElementById('displayTrackingNumber').textContent = trackingNum;
+
+  document.getElementById('timeline').innerHTML = `
+    <div class="timeline-item exception">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">No Record Found</div>
+        <div class="timeline-location">Please verify the tracking number and try again.</div>
+      </div>
+    </div>
+  `;
+}
+        function displayTracking(data, trackingNum) {
+            // Update status banner
+            const banner = document.getElementById('statusBanner');
+            banner.className = 'status-banner ' + data.status;
+
+            document.getElementById('statusTitle').textContent = data.statusTitle;
+            document.getElementById('statusDesc').textContent = data.statusDesc;
+            document.getElementById('displayTrackingNumber').textContent = trackingNum;
+
+            // Update status icon
+            const statusIconMap = {
+  delivered: '✓',
+  transit: '🚚',
+  exception: '⚠️',
+  pending: '⏳'
+};
+
+icon.textContent = statusIconMap[data.status] || '⏳';
+            // Update sender info
+            document.getElementById('senderName').textContent = data.sender.name;
+            document.getElementById('senderRef').textContent = data.sender.reference;
+            document.getElementById('senderAddress').textContent = data.sender.address;
+            document.getElementById('senderPhone').textContent = data.sender.phone;
+            document.getElementById('senderCountry').textContent = data.sender.country;
+
+            // Update receiver info
+            document.getElementById('receiverName').textContent = data.receiver.name;
+            document.getElementById('receiverAddress').textContent = data.receiver.address;
+            document.getElementById('receiverDestination').textContent = data.receiver.destination;
+            document.getElementById('receiverPhone').textContent = data.receiver.phone;
+            document.getElementById('receiverPostcode').textContent = data.receiver.postcode;
+
+            // Update shipment details
+            document.getElementById('serviceType').textContent = data.shipment.serviceType;
+            document.getElementById('weight').textContent = data.shipment.weight;
+            document.getElementById('pieces').textContent = data.shipment.pieces;
+            document.getElementById('xray').textContent = data.shipment.xrayResult;
+            document.getElementById('route').textContent = data.shipment.route;
+
+            // Update facts table
+            document.getElementById('factShipper').textContent = data.facts.shipper;
+            document.getElementById('factConsignee').textContent = data.facts.consignee;
+            document.getElementById('factOrigin').textContent = data.facts.origin;
+            document.getElementById('factDestination').textContent = data.facts.destination;
+            document.getElementById('factShipDate').textContent = data.facts.shipDate;
+            document.getElementById('factEstDelivery').textContent = data.facts.estDelivery;
+            document.getElementById('factService').textContent = data.facts.service;
+
+            // Update status color in facts table
+            const statusCell = document.getElementById('factStatus');
+            if (data.status === 'delivered') {
+                statusCell.innerHTML = '<strong style="color: #059669;">Delivered</strong>';
+            } else if (data.status === 'transit') {
+                statusCell.innerHTML = '<strong style="color: #d97706;">In Transit</strong>';
+            } else if (data.status === 'exception') {
+                statusCell.innerHTML = '<strong style="color: #dc2626;">Exception - Delayed</strong>';
+            }
+
+            // Generate timeline
+            const timelineContainer = document.getElementById('timeline');
+            timelineContainer.innerHTML = data.timeline.map(event => `
+                <div class="timeline-item ${event.status}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <div class="timeline-title">${event.title}</div>
+                            <div class="timeline-date">${event.date}</div>
+                        </div>
+                        <div class="timeline-location">
+                            <span>📍</span> ${event.location}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Show result
+            document.getElementById('trackingResult').style.display = 'block';
+
+            // Scroll to result
+            document.getElementById('trackingResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function generateRandomTracking(trackingNum) {
+            const randomData = {
+                status: 'transit',
+                statusTitle: 'In Transit',
+                statusDesc: 'Your consignment is on its way',
+                sender: {
+                    name: 'SENDER NAME',
+                    reference: 'REF-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                    address: 'SENDER ADDRESS, CITY, STATE ZIP',
+                    phone: '+1 (000) 000-0000',
+                    country: 'USA'
+                },
+                receiver: {
+                    name: 'RECEIVER NAME',
+                    address: 'RECEIVER ADDRESS, CITY, STATE ZIP',
+                    destination: 'DESTINATION STATE',
+                    phone: '+1 (000) 000-0000',
+                    postcode: '00000'
+                },
+                shipment: {
+                    serviceType: 'EXPRESS DELIVERY',
+                    weight: '10.0 kg',
+                    pieces: '1 Box',
+                    xrayResult: 'Non-Harmful Content (Negative)',
+                    route: 'ROUTE-' + Math.random().toString(36).substr(2, 6).toUpperCase()
+                },
+                facts: {
+                    shipper: 'SENDER, ADDRESS, USA',
+                    consignee: 'RECEIVER, ADDRESS, USA',
+                    origin: 'USA',
+                    destination: 'USA',
+                    shipDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+                    estDelivery: 'Pending',
+                    service: 'Express Delivery'
+                },
+                timeline: [
+                    {
+                        title: 'Shipment Created',
+                        location: 'Origin Facility',
+                        date: new Date().toLocaleString('en-US'),
+                        status: 'current'
+                    }
+                ]
+            };
+
+            displayTracking(randomData, trackingNum);
+        }
+
+        // Enter key support
+        document.getElementById('trackingInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') trackShipment();
+        });
+
+        // Auto-track on load if URL has parameter
+        window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const trackParam = urlParams.get('track');
+            if (trackParam) {
+                document.getElementById('trackingInput').value = trackParam;
+                trackShipment();
+            }
+        });
+    </script>
+</body>
+</html>        // EDIT THIS DATA TO UPDATE TRACKING INFORMATION
+        // ============================================
+
+        const  = {
             'FL-9999999999': {
     status: 'transit',
     statusTitle: 'In Transit',
@@ -969,7 +1356,7 @@
             setTimeout(() => {
                 document.getElementById('loading').style.display = 'none';
 
-                const data = trackingDatabase[trackingNum];
+                const data = [trackingNum];
 
                 if (data) {
                     displayTracking(data, trackingNum);
@@ -1346,7 +1733,7 @@
         // ============================================
         // EDIT THIS DATA TO UPDATE TRACKING INFORMATION
         // ============================================
-    const trackingDatabase = {
+    const  = {
             'FL-9999999999': {
     status: 'transit',
     statusTitle: 'In Transit',
@@ -1392,7 +1779,7 @@
             setTimeout(() => {
                 document.getElementById('loading').style.display = 'none';
 
-                const data = trackingDatabase[trackingNum];
+                const data = [trackingNum];
 
                 if (data) {
                     displayTracking(data, trackingNum);
