@@ -1,39 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Login - Fastline</title>
+  <title>Fastline Admin Login</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 </head>
+
 <body style="font-family: Arial; text-align:center; margin-top:100px;">
 
-<h2>Admin Login</h2>
+<h2>🔐 Fastline Admin Login</h2>
 
 <input type="email" id="email" placeholder="Email"><br><br>
 <input type="password" id="password" placeholder="Password"><br><br>
-<button onclick="login()">Login</button>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+<button onclick="login()">Login</button>
 
 <script>
 const firebaseConfig = {
-    apiKey: "YOUR_KEY",
-    authDomain: "YOUR_DOMAIN",
-    projectId: "fastline-logistics"
+  apiKey: "PASTE HERE",
+  authDomain: "PASTE HERE",
+  projectId: "PASTE HERE"
 };
 
 firebase.initializeApp(firebaseConfig);
 
 function login(){
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-    firebase.auth().signInWithEmailAndPassword(email, password)
-    .then(() => {
-        window.location = "dashboard.html";
-    })
-    .catch(err => alert(err.message));
+  firebase.auth().signInWithEmailAndPassword(email, password)
+  .then(() => {
+    alert("Login successful");
+    window.location.href = "dashboard.html";
+  })
+  .catch(error => {
+    alert(error.message);
+  });
 }
 </script>
 
+</body>
+</html>
 </body>
 </html>
