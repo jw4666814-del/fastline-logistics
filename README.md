@@ -12,8 +12,7 @@ Fastline Logistics is a consignment tracking website that allows users to track 
 2. Click "Track Now"
 3. View shipment details instantly
 
-## Demo Tracking Number
-FL-5326530558
+
 
 ## Author
 Fast Line Courier Service
