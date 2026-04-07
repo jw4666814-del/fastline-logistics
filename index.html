@@ -787,155 +787,30 @@
         // EDIT THIS DATA TO UPDATE TRACKING INFORMATION
         // ============================================
     const trackingDatabase = {
-            'FL-5326530558': {
-                // STATUS OPTIONS: 'delivered', 'transit', 'exception', 'pending'
-                status: 'transit',
-                statusTitle: 'In Transit',
-                statusDesc: 'Your consignment is on its way to the destination',
+            'FL-9999999999': {
+    status: 'transit',
+    statusTitle: 'In Transit',
+    statusDesc: 'Package is moving',
 
-                // SENDER INFORMATION - Edit these values
-                sender: {
-                    name: 'ANDY XIANG',
-                    reference: '01/AB/22C3/21',
-                    address: 'HOUSTON, TEXAS 77001',
-                    phone: '+1 (680) 215-7024',
-                    country: 'USA'
-                },
+    sender: {
+        name: 'NEW SENDER',
+        address: 'USA'
+    },
 
-                // RECEIVER INFORMATION - Edit these values
-                receiver: {
-                    name: 'MUI FONG NG',
-                    address: '2066 S FALCON DR, GILBERT, AZ 85295-5871',
-                    destination: 'ARIZONA',
-                    phone: '+1 (480) 524-7932',
-                    postcode: '85295'
-                },
+    receiver: {
+        name: 'NEW RECEIVER'
+    },
 
-                // SHIPMENT DETAILS - Edit these values
-                shipment: {
-                    serviceType: 'EXPRESS DELIVERY',
-                    weight: '30.7 kg',
-                    pieces: '1 Box',
-                    xrayResult: 'Non-Harmful Content (Negative)',
-                    route: '00123A339'
-                },
+    shipment: {
+        serviceType: 'EXPRESS'
+    },
 
-                // FACTS TABLE - Edit these values
-                facts: {
-                    shipper: 'ANDY XIANG, HOUSTON TEXAS, USA',
-                    consignee: 'MUI FONG NG, GILBERT ARIZONA, USA',
-                    origin: 'USA',
-                    destination: 'ARIZONA, USA',
-                    shipDate: 'April 6, 2026',
-                    estDelivery: 'April 8, 2026',
-                    service: 'Express Air Freight'
-                },
+    facts: {},
+    timeline: []
+},
 
-                // TIMELINE EVENTS - Add, remove, or edit events here
-                // status options: 'completed', 'current', 'pending'
-                timeline: [
-                    {
-                        title: 'Shipment Picked Up',
-                        location: 'Houston, Texas, USA',
-                        date: 'April 6, 2026 - 09:30 AM',
-                        status: 'completed'
-                    },
-                    {
-                        title: 'Arrived at Origin Facility',
-                        location: 'Houston Distribution Center, TX',
-                        date: 'April 6, 2026 - 02:15 PM',
-                        status: 'completed'
-                    },
-                    {
-                        title: 'Departed Origin Facility',
-                        location: 'Houston, TX → Phoenix, AZ',
-                        date: 'April 6, 2026 - 08:45 PM',
-                        status: 'completed'
-                    },
-                    {
-                        title: 'In Transit',
-                        location: 'En route to Phoenix, Arizona',
-                        date: 'April 7, 2026 - 06:00 AM',
-                        status: 'current'
-                    },
-                    {
-                        title: 'Arrived at Destination Facility',
-                        location: 'Phoenix Distribution Center, AZ',
-                        date: 'Expected: April 7, 2026 - 02:00 PM',
-                        status: 'pending'
-                    },
-                    {
-                        title: 'Out for Delivery',
-                        location: 'Gilbert, Arizona',
-                        date: 'Expected: April 8, 2026 - 08:00 AM',
-                        status: 'pending'
-                    },
-                    {
-                        title: 'Delivered',
-                        location: '2066 S FALCON DR, GILBERT, AZ',
-                        date: 'Expected: April 8, 2026 - 02:00 PM',
-                        status: 'pending'
-                    }
-                ]
-            },
 
-            // Add more tracking numbers here following the same format
-            'FL-1234567890': {
-                status: 'delivered',
-                statusTitle: 'Delivered',
-                statusDesc: 'Your consignment has been delivered successfully',
-
-                sender: {
-                    name: 'JOHN SMITH',
-                    reference: 'REF-2026-001',
-                    address: 'NEW YORK, NY 10001',
-                    phone: '+1 (212) 555-0123',
-                    country: 'USA'
-                },
-
-                receiver: {
-                    name: 'JANE DOE',
-                    address: 'LOS ANGELES, CA 90001',
-                    destination: 'CALIFORNIA',
-                    phone: '+1 (310) 555-0456',
-                    postcode: '90001'
-                },
-
-                shipment: {
-                    serviceType: 'STANDARD GROUND',
-                    weight: '5.2 kg',
-                    pieces: '2 Boxes',
-                    xrayResult: 'Cleared',
-                    route: 'NY-LA-001'
-                },
-
-                facts: {
-                    shipper: 'JOHN SMITH, NEW YORK, USA',
-                    consignee: 'JANE DOE, LOS ANGELES, USA',
-                    origin: 'NEW YORK, USA',
-                    destination: 'CALIFORNIA, USA',
-                    shipDate: 'April 1, 2026',
-                    estDelivery: 'April 5, 2026',
-                    service: 'Ground Shipping'
-                },
-
-                timeline: [
-                    {
-                        title: 'Shipment Picked Up',
-                        location: 'New York, NY',
-                        date: 'April 1, 2026 - 10:00 AM',
-                        status: 'completed'
-                    },
-                    {
-                        title: 'Delivered',
-                        location: 'Los Angeles, CA',
-                        date: 'April 5, 2026 - 02:30 PM',
-                        status: 'completed'
-                    }
-                ]
-            }
-        };
-
+           
         // ============================================
         // DO NOT EDIT BELOW THIS LINE (System Code)
         // ============================================
