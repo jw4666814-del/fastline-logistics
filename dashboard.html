@@ -1,40 +1,271 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Fastline Dashboard</title>
-
+  <title>Fastline Admin Dashboard</title>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      padding: 20px; 
+      background: #f3f4f6; 
+      max-width: 900px; 
+      margin: 0 auto; 
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    h2 { color: #1e40af; margin: 0; }
+    .logout-btn { 
+      background: #ef4444; 
+      color: white; 
+      border: none; 
+      padding: 8px 16px; 
+      border-radius: 6px; 
+      cursor: pointer;
+    }
+    .logout-btn:hover { background: #dc2626; }
+    .box { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 8px; 
+      margin-bottom: 20px; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+    }
+    h3 { margin-top: 0; color: #374151; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+    label { 
+      display: inline-block; 
+      width: 150px; 
+      color: #6b7280; 
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    input, select { 
+      padding: 8px; 
+      width: 300px; 
+      border: 1px solid #ddd; 
+      border-radius: 4px; 
+      margin-bottom: 10px;
+    }
+    .save-btn { 
+      background: #10b981; 
+      color: white; 
+      border: none; 
+      padding: 10px 20px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    .save-btn:hover { background: #059669; }
+    ul { list-style: none; padding: 0; }
+    li { 
+      background: #f9fafb; 
+      padding: 12px; 
+      margin: 8px 0; 
+      border-radius: 6px; 
+      border-left: 4px solid #3b82f6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status-delivered { background: #d1fae5; color: #059669; }
+    .status-transit { background: #fef3c7; color: #d97706; }
+    .status-exception { background: #fee2e2; color: #dc2626; }
+    .status-pending { background: #f3f4f6; color: #6b7280; }
+    .success-msg { color: #059669; margin-top: 10px; font-weight: 600; }
+  </style>
 </head>
+<body>
+  <div class="header">
+    <h2>📦 Fastline Admin Dashboard</h2>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
 
-<body style="font-family: Arial; padding:20px;">
+  <div class="box">
+    <h3>Add or Update Shipment</h3>
+    
+    <label>Tracking Number:</label>
+    <input id="tracking" placeholder="e.g., FL-5326530558"><br>
+    
+    <label>Status:</label>
+    <select id="status">
+      <option value="transit">In Transit</option>
+      <option value="delivered">Delivered</option>
+      <option value="exception">Exception</option>
+      <option value="pending">Pending</option>
+    </select><br>
+    
+    <label>Status Title:</label>
+    <input id="statusTitle" placeholder="e.g., 'In Transit - On Schedule'"><br>
+    
+    <label>Sender Name:</label>
+    <input id="senderName" placeholder="e.g., ANDY XIANG"><br>
+    
+    <label>Receiver Name:</label>
+    <input id="receiverName" placeholder="e.g., MUI FONG NG"><br>
+    
+    <button class="save-btn" onclick="save()">💾 Save Shipment</button>
+    <p id="successMsg" class="success-msg"></p>
+  </div>
 
-<h2>📦 Fastline Admin Dashboard</h2>
+  <div class="box">
+    <h3>All Shipments</h3>
+    <ul id="list"></ul>
+  </div>
 
-<input id="tracking" placeholder="FL123456"><br><br>
-<input id="status" placeholder="Status (In Transit...)"><br><br>
+  <script>
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",
+      authDomain: "fastline-logistics.firebaseapp.com",
+      projectId: "fastline-logistics",
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-<button onclick="save()">Save Shipment</button>
+    // Check if user is logged in
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) {
+        // Not logged in, redirect to login
+        window.location.href = "login.html";
+      }
+    });
 
-<hr>
+    function logout() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    }
 
-<h3>All Shipments</h3>
-<ul id="list"></ul>
+    function save(){
+      const tracking = document.getElementById("tracking").value.trim().toUpperCase();
+      const status = document.getElementById("status").value;
+      const statusTitle = document.getElementById("statusTitle").value || status;
+      const senderName = document.getElementById("senderName").value || 'Unknown';
+      const receiverName = document.getElementById("receiverName").value || 'Unknown';
+      
+      if (!tracking) {
+        alert("Please enter a tracking number");
+        return;
+      }
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",
-  authDomain: "fastline-logistics.firebaseapp.com",
-  projectId: "fastline-logistics",
+      // Create the data object
+      const data = {
+        status: status,
+        statusTitle: statusTitle,
+        statusDesc: getStatusDesc(status),
+        sender: { 
+          name: senderName,
+          reference: '',
+          address: '',
+          phone: '',
+          country: 'USA'
+        },
+        receiver: { 
+          name: receiverName,
+          address: '',
+          destination: '',
+          phone: '',
+          postcode: ''
+        },
+        shipment: {
+          serviceType: 'EXPRESS DELIVERY',
+          weight: '0 kg',
+          pieces: '1 Box',
+          xrayResult: 'Non-Harmful Content (Negative)',
+          route: 'PENDING'
+        },
+        facts: {
+          shipper: senderName + ', USA',
+          consignee: receiverName + ', USA',
+          origin: 'USA',
+          destination: 'USA',
+          shipDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+          estDelivery: 'Pending',
+          service: 'Express Air Freight'
+        },
+        timeline: [
+          {
+            title: 'Shipment Created',
+            location: 'Origin Facility',
+            date: new Date().toLocaleString('en-US'),
+            status: 'current'
+          }
+        ],
+        updatedAt: new Date().toISOString()
+      };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+      // Save to Firebase
+      db.collection("shipments").doc(tracking).set(data)
+        .then(() => {
+          document.getElementById("successMsg").textContent = "✅ Shipment saved successfully!";
+          document.getElementById("tracking").value = "";
+          document.getElementById("statusTitle").value = "";
+          document.getElementById("senderName").value = "";
+          document.getElementById("receiverName").value = "";
+          
+          setTimeout(() => {
+            document.getElementById("successMsg").textContent = "";
+          }, 3000);
+        })
+        .catch(error => {
+          alert("Error saving: " + error.message);
+        });
+    }
 
-function save(){
-  const tracking = document.getElementById("tracking").value;
-  const status = document.getElementById("status").value;
+    function getStatusDesc(status) {
+      const descs = {
+        delivered: 'Your consignment has been delivered successfully',
+        transit: 'Your consignment is on its way to the destination',
+        exception: 'There is an issue with your shipment',
+        pending: 'Waiting for pickup'
+      };
+      return descs[status] || 'Processing';
+    }
 
-  db.collection("shipments").doc(tracking).set({
+    // Load all shipments in real-time
+    db.collection("shipments").onSnapshot(snapshot => {
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+      
+      if (snapshot.empty) {
+        list.innerHTML = "<li>No shipments found. Add one above!</li>";
+        return;
+      }
+      
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        
+        const statusClass = 'status-' + (data.status || 'pending');
+        const statusText = data.status || 'pending';
+        
+        li.innerHTML = `
+          <div>
+            <strong>${doc.id}</strong><br>
+            <small>${data.sender?.name || 'Unknown'} → ${data.receiver?.name || 'Unknown'}</small>
+          </div>
+          <span class="status-badge ${statusClass}">${statusText}</span>
+        `;
+        list.appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html>  db.collection("shipments").doc(tracking).set({
     status: status,
     sender: "Fastline Logistics",
     receiver: "Customer",
