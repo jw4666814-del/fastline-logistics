@@ -1,296 +1,621 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Fastline Admin Dashboard</title>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      padding: 20px; 
-      background: #f3f4f6; 
-      max-width: 900px; 
-      margin: 0 auto; 
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    h2 { color: #1e40af; margin: 0; }
-    .logout-btn { 
-      background: #ef4444; 
-      color: white; 
-      border: none; 
-      padding: 8px 16px; 
-      border-radius: 6px; 
-      cursor: pointer;
-    }
-    .logout-btn:hover { background: #dc2626; }
-    .box { 
-      background: white; 
-      padding: 20px; 
-      border-radius: 8px; 
-      margin-bottom: 20px; 
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-    }
-    h3 { margin-top: 0; color: #374151; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
-    label { 
-      display: inline-block; 
-      width: 150px; 
-      color: #6b7280; 
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    input, select { 
-      padding: 8px; 
-      width: 300px; 
-      border: 1px solid #ddd; 
-      border-radius: 4px; 
-      margin-bottom: 10px;
-    }
-    .save-btn { 
-      background: #10b981; 
-      color: white; 
-      border: none; 
-      padding: 10px 20px; 
-      border-radius: 6px; 
-      cursor: pointer; 
-      font-weight: 600;
-      margin-top: 10px;
-    }
-    .save-btn:hover { background: #059669; }
-    ul { list-style: none; padding: 0; }
-    li { 
-      background: #f9fafb; 
-      padding: 12px; 
-      margin: 8px 0; 
-      border-radius: 6px; 
-      border-left: 4px solid #3b82f6;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .status-badge {
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-    .status-delivered { background: #d1fae5; color: #059669; }
-    .status-transit { background: #fef3c7; color: #d97706; }
-    .status-exception { background: #fee2e2; color: #dc2626; }
-    .status-pending { background: #f3f4f6; color: #6b7280; }
-    .success-msg { color: #059669; margin-top: 10px; font-weight: 600; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fastline Admin Dashboard</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* Header */
+        .header {
+            background: rgba(255,255,255,0.95);
+            padding: 20px 30px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .logo { display: flex; align-items: center; gap: 12px; font-size: 1.5rem; font-weight: 700; color: #1e40af; }
+        .logout-btn { 
+            background: #ef4444; 
+            color: white; 
+            border: none; 
+            padding: 10px 24px; 
+            border-radius: 8px; 
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .logout-btn:hover { background: #dc2626; transform: translateY(-2px); }
+
+        /* Main Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 1024px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Form Sections */
+        .form-section {
+            background: rgba(255,255,255,0.98);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        @media (max-width: 640px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        
+        label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        input, select {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            transition: all 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        .datetime-input {
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Services Section */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #f9fafb;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .checkbox-item:hover { background: #f3f4f6; }
+        .checkbox-item input { width: auto; margin: 0; }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(5,150,105,0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(5,150,105,0.4);
+        }
+
+        /* Shipments List */
+        .shipments-section {
+            background: rgba(255,255,255,0.98);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            grid-column: 1 / -1;
+        }
+        .shipment-card {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #3b82f6;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 15px;
+            align-items: center;
+        }
+        @media (max-width: 768px) {
+            .shipment-card { grid-template-columns: 1fr; }
+        }
+        .shipment-info h4 { color: #1e40af; font-size: 1.125rem; margin-bottom: 5px; }
+        .shipment-info p { color: #6b7280; font-size: 0.875rem; }
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-align: center;
+        }
+        .status-transit { background: #fef3c7; color: #d97706; }
+        .status-delivered { background: #d1fae5; color: #059669; }
+        .status-exception { background: #fee2e2; color: #dc2626; }
+        .status-pending { background: #f3f4f6; color: #6b7280; }
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        /* Success Message */
+        .success-msg {
+            background: #d1fae5;
+            color: #059669;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Receipt Preview */
+        .receipt-preview {
+            background: #f0f9ff;
+            border: 2px dashed #3b82f6;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            color: #3b82f6;
+        }
+    </style>
 </head>
 <body>
-  <div class="header">
-    <h2>📦 Fastline Admin Dashboard</h2>
-    <button class="logout-btn" onclick="logout()">Logout</button>
-  </div>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <span style="font-size: 2rem;">🚛</span>
+                <div>
+                    <div>Fastline Logistics</div>
+                    <div style="font-size: 0.75rem; color: #6b7280; font-weight: 400;">Admin Dashboard</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+        </div>
 
-  <div class="box">
-    <h3>Add or Update Shipment</h3>
-    
-    <label>Tracking Number:</label>
-    <input id="tracking" placeholder="e.g., FL-5326530558"><br>
-    
-    <label>Status:</label>
-    <select id="status">
-      <option value="transit">In Transit</option>
-      <option value="delivered">Delivered</option>
-      <option value="exception">Exception</option>
-      <option value="pending">Pending</option>
-    </select><br>
-    
-    <label>Status Title:</label>
-    <input id="statusTitle" placeholder="e.g., 'In Transit - On Schedule'"><br>
-    
-    <label>Sender Name:</label>
-    <input id="senderName" placeholder="e.g., ANDY XIANG"><br>
-    
-    <label>Receiver Name:</label>
-    <input id="receiverName" placeholder="e.g., MUI FONG NG"><br>
-    
-    <button class="save-btn" onclick="save()">💾 Save Shipment</button>
-    <p id="successMsg" class="success-msg"></p>
-  </div>
+        <div class="dashboard-grid">
+            <!-- Sender Information -->
+            <div class="form-section">
+                <div class="section-title">📤 Sender's Information</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Sender's Name</label>
+                        <input type="text" id="senderName" placeholder="DENNIS CHANG">
+                    </div>
+                    <div class="form-group">
+                        <label>Sender Reference</label>
+                        <input type="text" id="senderRef" placeholder="01/AB/22C3/21">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Address</label>
+                        <input type="text" id="senderAddress" placeholder="HOUSTON TEXAS">
+                    </div>
+                    <div class="form-group">
+                        <label>Post Code</label>
+                        <input type="text" id="senderPostcode" placeholder="77001">
+                    </div>
+                    <div class="form-group">
+                        <label>Telephone</label>
+                        <input type="text" id="senderPhone" placeholder="+1(236)6836915">
+                    </div>
+                    <div class="form-group">
+                        <label>Origin Country</label>
+                        <select id="originCountry">
+                            <option value="USA">USA</option>
+                            <option value="MALAYSIA">MALAYSIA</option>
+                            <option value="SINGAPORE">SINGAPORE</option>
+                            <option value="THAILAND">THAILAND</option>
+                            <option value="CHINA">CHINA</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
 
-  <div class="box">
-    <h3>All Shipments</h3>
-    <ul id="list"></ul>
-  </div>
+            <!-- Receiver Information -->
+            <div class="form-section">
+                <div class="section-title">📥 Receiver's Information</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Receiver's Name</label>
+                        <input type="text" id="receiverName" placeholder="LOW SIEW CHAUN">
+                    </div>
+                    <div class="form-group">
+                        <label>Destination Country</label>
+                        <select id="destinationCountry">
+                            <option value="MALAYSIA">MALAYSIA</option>
+                            <option value="USA">USA</option>
+                            <option value="SINGAPORE">SINGAPORE</option>
+                            <option value="THAILAND">THAILAND</option>
+                            <option value="CHINA">CHINA</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Full Address</label>
+                        <input type="text" id="receiverAddress" placeholder="NO. 56, PERSIARAN SEKSYEN 5/3, BANDAR PUTRA BERTAM, KEPALA BATAS, PULAU PINANG">
+                    </div>
+                    <div class="form-group">
+                        <label>Post Code</label>
+                        <input type="text" id="receiverPostcode" placeholder="13200">
+                    </div>
+                    <div class="form-group">
+                        <label>Telephone</label>
+                        <input type="text" id="receiverPhone" placeholder="+60135122267">
+                    </div>
+                </div>
+            </div>
 
-  <script>
-    // Your Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",
-      authDomain: "fastline-logistics.firebaseapp.com",
-      projectId: "fastline-logistics",
-    };
-    
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+            <!-- Shipment Details -->
+            <div class="form-section">
+                <div class="section-title">📦 Shipment Details</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tracking Number</label>
+                        <input type="text" id="trackingNum" placeholder="FL-5326530558">
+                    </div>
+                    <div class="form-group">
+                        <label>Service Type</label>
+                        <select id="serviceType">
+                            <option value="EXPRESS DELIVERY">EXPRESS DELIVERY</option>
+                            <option value="DIPLOMATIC DOCUMENT">DIPLOMATIC DOCUMENT</option>
+                            <option value="WORLD WIDE DIPLOMATIC">WORLD WIDE DIPLOMATIC</option>
+                            <option value="DOMESTIC PACKAGE">DOMESTIC PACKAGE</option>
+                            <option value="WORLD MAIL">WORLD MAIL</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Number of Pieces</label>
+                        <input type="text" id="pieces" placeholder="1 Box">
+                    </div>
+                    <div class="form-group">
+                        <label>Weight (kg)</label>
+                        <input type="text" id="weight" placeholder="30.7kg">
+                    </div>
+                    <div class="form-group">
+                        <label>X-Ray Scan Result</label>
+                        <select id="xrayResult">
+                            <option value="Non-Harmful Content (Negative)">Non-Harmful Content (Negative)</option>
+                            <option value="Cleared">Cleared</option>
+                            <option value="Pending Scan">Pending Scan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Route Number</label>
+                        <input type="text" id="route" placeholder="00123A339">
+                    </div>
+                    <div class="form-group">
+                        <label>Shipment Value</label>
+                        <input type="text" id="shipmentValue" placeholder="1,400">
+                    </div>
+                    <div class="form-group">
+                        <label>Total Charges</label>
+                        <input type="text" id="totalCharges" placeholder="2,400">
+                    </div>
+                </div>
 
-    // Check if user is logged in
-    firebase.auth().onAuthStateChanged(user => {
-      if (!user) {
-        // Not logged in, redirect to login
-        window.location.href = "login.html";
-      }
-    });
+                <div style="margin-top: 15px;">
+                    <label style="font-weight: 600; color: #374151; margin-bottom: 10px; display: block;">Service Selection</label>
+                    <div class="services-grid">
+                        <label class="checkbox-item"><input type="checkbox" id="svcDiplomatic"> DIPLOMATIC DOCUMENT</label>
+                        <label class="checkbox-item"><input type="checkbox" id="svcWorldDiplomatic"> WORLD WIDE DIPLOMATIC</label>
+                        <label class="checkbox-item"><input type="checkbox" id="svcDomestic" checked> DOMESTIC PACKAGE</label>
+                        <label class="checkbox-item"><input type="checkbox" id="svcWorldMail"> WORLD MAIL</label>
+                    </div>
+                </div>
+            </div>
 
-    function logout() {
-      firebase.auth().signOut().then(() => {
-        window.location.href = "login.html";
-      });
-    }
+            <!-- Dates & Status -->
+            <div class="form-section">
+                <div class="section-title">📅 Dates & Timeline</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Shipment Date & Time</label>
+                        <input type="datetime-local" id="shipDate" class="datetime-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Estimated Delivery</label>
+                        <input type="datetime-local" id="estDelivery" class="datetime-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Status</label>
+                        <select id="status">
+                            <option value="transit">🚚 In Transit</option>
+                            <option value="delivered">✅ Delivered</option>
+                            <option value="exception">⚠️ Exception</option>
+                            <option value="pending">⏳ Pending</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status Title</label>
+                        <input type="text" id="statusTitle" placeholder="In Transit - On Schedule">
+                    </div>
+                </div>
 
-    function save(){
-      const tracking = document.getElementById("tracking").value.trim().toUpperCase();
-      const status = document.getElementById("status").value;
-      const statusTitle = document.getElementById("statusTitle").value || status;
-      const senderName = document.getElementById("senderName").value || 'Unknown';
-      const receiverName = document.getElementById("receiverName").value || 'Unknown';
-      
-      if (!tracking) {
-        alert("Please enter a tracking number");
-        return;
-      }
+                <div class="receipt-preview">
+                    <div style="font-size: 1.5rem; margin-bottom: 10px;">🧾</div>
+                    <div>This will generate an Air Way Bill matching your receipt format</div>
+                    <div style="font-size: 0.875rem; margin-top: 5px;">All fields will be saved to Firebase Database</div>
+                </div>
+            </div>
+        </div>
 
-      // Create the data object
-      const data = {
-        status: status,
-        statusTitle: statusTitle,
-        statusDesc: getStatusDesc(status),
-        sender: { 
-          name: senderName,
-          reference: '',
-          address: '',
-          phone: '',
-          country: 'USA'
-        },
-        receiver: { 
-          name: receiverName,
-          address: '',
-          destination: '',
-          phone: '',
-          postcode: ''
-        },
-        shipment: {
-          serviceType: 'EXPRESS DELIVERY',
-          weight: '0 kg',
-          pieces: '1 Box',
-          xrayResult: 'Non-Harmful Content (Negative)',
-          route: 'PENDING'
-        },
-        facts: {
-          shipper: senderName + ', USA',
-          consignee: receiverName + ', USA',
-          origin: 'USA',
-          destination: 'USA',
-          shipDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-          estDelivery: 'Pending',
-          service: 'Express Air Freight'
-        },
-        timeline: [
-          {
-            title: 'Shipment Created',
-            location: 'Origin Facility',
-            date: new Date().toLocaleString('en-US'),
-            status: 'current'
-          }
-        ],
-        updatedAt: new Date().toISOString()
-      };
+        <!-- Save Button -->
+        <button class="btn-primary" onclick="saveShipment()">💾 SAVE SHIPMENT TO DATABASE</button>
+        <div class="success-msg" id="successMsg">✅ Shipment saved successfully!</div>
 
-      // Save to Firebase
-      db.collection("shipments").doc(tracking).set(data)
-        .then(() => {
-          document.getElementById("successMsg").textContent = "✅ Shipment saved successfully!";
-          document.getElementById("tracking").value = "";
-          document.getElementById("statusTitle").value = "";
-          document.getElementById("senderName").value = "";
-          document.getElementById("receiverName").value = "";
-          
-          setTimeout(() => {
-            document.getElementById("successMsg").textContent = "";
-          }, 3000);
-        })
-        .catch(error => {
-          alert("Error saving: " + error.message);
+        <!-- All Shipments -->
+        <div class="shipments-section" style="margin-top: 30px;">
+            <div class="section-title">📋 All Shipments</div>
+            <div id="shipmentsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",
+            authDomain: "fastline-logistics.firebaseapp.com",
+            projectId: "fastline-logistics",
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Check auth
+        firebase.auth().onAuthStateChanged(user => {
+            if (!user) window.location.href = "login.html";
         });
-    }
 
-    function getStatusDesc(status) {
-      const descs = {
-        delivered: 'Your consignment has been delivered successfully',
-        transit: 'Your consignment is on its way to the destination',
-        exception: 'There is an issue with your shipment',
-        pending: 'Waiting for pickup'
-      };
-      return descs[status] || 'Processing';
-    }
+        function logout() {
+            firebase.auth().signOut().then(() => window.location.href = "login.html");
+        }
 
-    // Load all shipments in real-time
-    db.collection("shipments").onSnapshot(snapshot => {
-      const list = document.getElementById("list");
-      list.innerHTML = "";
-      
-      if (snapshot.empty) {
-        list.innerHTML = "<li>No shipments found. Add one above!</li>";
-        return;
-      }
-      
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const li = document.createElement("li");
-        
-        const statusClass = 'status-' + (data.status || 'pending');
-        const statusText = data.status || 'pending';
-        
-        li.innerHTML = `
-          <div>
-            <strong>${doc.id}</strong><br>
-            <small>${data.sender?.name || 'Unknown'} → ${data.receiver?.name || 'Unknown'}</small>
-          </div>
-          <span class="status-badge ${statusClass}">${statusText}</span>
-        `;
-        list.appendChild(li);
-      });
-    });
-  </script>
-</body>
-</html>  db.collection("shipments").doc(tracking).set({
-    status: status,
-    sender: "Fastline Logistics",
-    receiver: "Customer",
-    date: new Date().toLocaleString()
-  });
+        function saveShipment() {
+            const trackingNum = document.getElementById('trackingNum').value.trim().toUpperCase();
+            
+            if (!trackingNum) {
+                alert("Please enter a tracking number");
+                return;
+            }
 
-  alert("Shipment saved!");
-}
+            // Get all form values
+            const data = {
+                // Tracking
+                trackingNumber: trackingNum,
+                
+                // Sender Info
+                sender: {
+                    name: document.getElementById('senderName').value || 'Unknown',
+                    reference: document.getElementById('senderRef').value || '',
+                    address: document.getElementById('senderAddress').value || '',
+                    postcode: document.getElementById('senderPostcode').value || '',
+                    phone: document.getElementById('senderPhone').value || '',
+                    country: document.getElementById('originCountry').value || 'USA'
+                },
+                
+                // Receiver Info
+                receiver: {
+                    name: document.getElementById('receiverName').value || 'Unknown',
+                    address: document.getElementById('receiverAddress').value || '',
+                    postcode: document.getElementById('receiverPostcode').value || '',
+                    phone: document.getElementById('receiverPhone').value || '',
+                    country: document.getElementById('destinationCountry').value || 'MALAYSIA',
+                    destination: document.getElementById('destinationCountry').value || 'MALAYSIA'
+                },
+                
+                // Shipment Details
+                shipment: {
+                    serviceType: document.getElementById('serviceType').value || 'EXPRESS DELIVERY',
+                    pieces: document.getElementById('pieces').value || '1 Box',
+                    weight: document.getElementById('weight').value || '0 kg',
+                    xrayResult: document.getElementById('xrayResult').value || 'Non-Harmful Content (Negative)',
+                    route: document.getElementById('route').value || '',
+                    value: document.getElementById('shipmentValue').value || '',
+                    totalCharges: document.getElementById('totalCharges').value || ''
+                },
+                
+                // Services selected
+                services: {
+                    diplomatic: document.getElementById('svcDiplomatic').checked,
+                    worldDiplomatic: document.getElementById('svcWorldDiplomatic').checked,
+                    domestic: document.getElementById('svcDomestic').checked,
+                    worldMail: document.getElementById('svcWorldMail').checked
+                },
+                
+                // Dates
+                shipDate: document.getElementById('shipDate').value || new Date().toISOString(),
+                estDelivery: document.getElementById('estDelivery').value || '',
+                
+                // Status
+                status: document.getElementById('status').value || 'transit',
+                statusTitle: document.getElementById('statusTitle').value || 'In Transit',
+                statusDesc: getStatusDesc(document.getElementById('status').value),
+                
+                // Facts for display
+                facts: {
+                    shipper: (document.getElementById('senderName').value || 'Unknown') + ', ' + 
+                             (document.getElementById('senderAddress').value || 'USA') + ', ' + 
+                             (document.getElementById('originCountry').value || 'USA'),
+                    consignee: (document.getElementById('receiverName').value || 'Unknown') + ', ' + 
+                                (document.getElementById('receiverAddress').value || 'MALAYSIA'),
+                    origin: document.getElementById('originCountry').value || 'USA',
+                    destination: document.getElementById('destinationCountry').value || 'MALAYSIA',
+                    shipDate: formatDate(document.getElementById('shipDate').value),
+                    estDelivery: formatDate(document.getElementById('estDelivery').value),
+                    service: document.getElementById('serviceType').value || 'Express Delivery'
+                },
+                
+                // Initial timeline
+                timeline: [
+                    {
+                        title: 'Shipment Created',
+                        location: document.getElementById('senderAddress').value || 'Origin Facility',
+                        date: formatDateTime(document.getElementById('shipDate').value),
+                        status: 'completed'
+                    },
+                    {
+                        title: 'In Transit',
+                        location: 'En route to ' + (document.getElementById('destinationCountry').value || 'Destination'),
+                        date: new Date().toLocaleString('en-US'),
+                        status: 'current'
+                    }
+                ],
+                
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
 
-// Load shipments
-db.collection("shipments").onSnapshot(snapshot => {
-  const list = document.getElementById("list");
-  list.innerHTML = "";
+            // Save to Firebase
+            db.collection("shipments").doc(trackingNum).set(data)
+                .then(() => {
+                    document.getElementById('successMsg').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('successMsg').style.display = 'none';
+                    }, 3000);
+                    clearForm();
+                })
+                .catch(error => {
+                    alert("Error saving: " + error.message);
+                });
+        }
 
-  snapshot.forEach(doc => {
-    const li = document.createElement("li");
-    li.textContent = doc.id + " - " + doc.data().status;
-    list.appendChild(li);
-  });
-});
-</script>
+        function getStatusDesc(status) {
+            const descs = {
+                delivered: 'Your consignment has been delivered successfully',
+                transit: 'Your consignment is on its way to the destination',
+                exception: 'There is an issue with your shipment',
+                pending: 'Waiting for pickup at origin facility'
+            };
+            return descs[status] || 'Processing';
+        }
 
-</body>
-</html>}
-</script>
+        function formatDate(dateString) {
+            if (!dateString) return 'Pending';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        }
 
+        function formatDateTime(dateString) {
+            if (!dateString) return new Date().toLocaleString('en-US');
+            return new Date(dateString).toLocaleString('en-US');
+        }
+
+        function clearForm() {
+            document.getElementById('trackingNum').value = '';
+            document.getElementById('senderName').value = '';
+            document.getElementById('senderRef').value = '';
+            document.getElementById('senderAddress').value = '';
+            document.getElementById('senderPostcode').value = '';
+            document.getElementById('senderPhone').value = '';
+            document.getElementById('receiverName').value = '';
+            document.getElementById('receiverAddress').value = '';
+            document.getElementById('receiverPostcode').value = '';
+            document.getElementById('receiverPhone').value = '';
+            document.getElementById('pieces').value = '';
+            document.getElementById('weight').value = '';
+            document.getElementById('route').value = '';
+            document.getElementById('shipmentValue').value = '';
+            document.getElementById('totalCharges').value = '';
+            document.getElementById('statusTitle').value = '';
+        }
+
+        // Load all shipments
+        db.collection("shipments").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+            const list = document.getElementById('shipmentsList');
+            list.innerHTML = '';
+            
+            if (snapshot.empty) {
+                list.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 40px;">No shipments yet. Create one above!</p>';
+                return;
+            }
+            
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const div = document.createElement('div');
+                div.className = 'shipment-card';
+                div.innerHTML = `
+                    <div class="shipment-info">
+                        <h4>📦 ${doc.id}</h4>
+                        <p>${data.sender?.name || 'Unknown'} (${data.sender?.country || '?'}) → 
+                           ${data.receiver?.name || 'Unknown'} (${data.receiver?.country || '?'})</p>
+                        <p style="margin-top: 5px; font-size: 0.8rem;">
+                           📅 ${formatDate(data.shipDate)} | ⚖️ ${data.shipment?.weight || '-'} | 
+                           💰 ${data.shipment?.totalCharges || '-'} USD
+                        </p>
+                    </div>
+                    <div>
+                        <span class="status-badge status-${data.status || 'pending'}">${data.status || 'pending'}</span>
+                    </div>
+                    <div style="text-align: center; color: #6b7280; font-size: 0.875rem;">
+                        <div>🕐</div>
+                        <div>${data.timeline?.length || 0} events</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteShipment('${doc.id}')">🗑️ Delete</button>
+                `;
+                list.appendChild(div);
+            });
+        });
+
+        function deleteShipment(trackingNum) {
+            if (confirm('Are you sure you want to delete ' + trackingNum + '?')) {
+                db.collection("shipments").doc(trackingNum).delete();
+            }
+        }
+
+        // Set default dates
+        document.getElementById('shipDate').value = new Date().toISOString().slice(0, 16);
+    </script>
 </body>
 </html>
