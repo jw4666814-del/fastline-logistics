@@ -6,7 +6,7 @@
     <title>FASTLINE LOGISTICS | Consignment Tracking</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f3f4f6; color: #1f2937; line-height: 1.6; }
+         { font-family: Arial, sans-serif; background: #f3f4f6; color: #1f2937; line-height: 1.6; }
         .header { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 1rem 0; }
         .header-content { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
         .logo { display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 700; }
@@ -29,14 +29,45 @@
         .loading { display: none; text-align: center; padding: 2rem; color: #6b7280; }
         .footer { background: #111827; color: white; padding: 2rem 0; margin-top: 3rem; text-align: center; }
     </style>
+    <div style="display:flex; align-items:center; gap:10px;">
+    <div style="
+        width:40px;
+        height:40px;
+        background:#3b82f6;
+        border-radius:8px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:bold;
+        font-size:18px;
+    ">
+        FL
+    </div>
+    <span style="
+        font-size:1.4rem;
+        font-weight:800;
+        letter-spacing:1px;
+    ">
+        FASTLINE LOGISTICS
+    </span>
+</div>
 </head>
-<body>
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">🚛 FASTLINE LOGISTICS</div>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(rgba(10,20,40,0.85), rgba(10,20,40,0.85)),
+                url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1600');
+    background-size: cover;
+    background-position: center;
+    color: #ffffff;
+}
         </div>
     </header>
-
+<div class="map-section" style="margin-top:20px;">
+    <h3 style="color:white;">🗺️ Live Shipment Location</h3>
+    <div id="map" style="height:300px; border-radius:10px;"></div>
+</div>
     <div class="container">
         <section class="search-section">
             <h1 class="search-title">Track Your Consignment</h1>
@@ -86,13 +117,24 @@
     </div>
 
     <footer class="footer">
-        <p>© 2026 Fastline Logistics. All rights reserved.</p>
+        <p>© 2010 Fastline Logistics. All rights reserved.</p>
     </footer>
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
     <script>
+        function loadMap(lat = 33.4484, lng = -112.0740) {
+    const map = L.map('map').setView([lat, lng], 6);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    L.marker([lat, lng]).addTo(map)
+        .bindPopup("Shipment Location")
+        .openPopup();
+}
         // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",
@@ -103,7 +145,7 @@
         const db = firebase.firestore();
 
         // Track shipment function
-        async function trackShipment() {
+        async function trackShipment(loadMap(33.4484, -112.0740);) {
             const trackingNum = document.getElementById('trackingInput').value.trim().toUpperCase();
             
             if (!trackingNum) {
@@ -164,5 +206,5 @@
             if (e.key === 'Enter') trackShipment();
         });
     </script>
-</body>
+</>
 </html>
