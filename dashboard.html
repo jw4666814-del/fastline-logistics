@@ -3,71 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fastline Admin Dashboard</title>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <title>Fastline Admin | Shipment Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container { max-width: 1400px; margin: 0 auto; }
         
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #111827;
+            --light: #f3f4f6;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .floating-icon {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.08;
+            animation: float-bg 15s linear infinite;
+        }
+        
+        @keyframes float-bg {
+            0% { transform: translateX(-100px) translateY(100px) rotate(0deg); }
+            100% { transform: translateX(calc(100vw + 100px)) translateY(-100px) rotate(360deg); }
+        }
+
         /* Header */
         .header {
             background: rgba(255,255,255,0.95);
-            padding: 20px 30px;
-            border-radius: 16px;
-            margin-bottom: 20px;
+            backdrop-filter: blur(20px);
+            padding: 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .header-top {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 8px 0;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+        
+        .header-main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-        .logo { display: flex; align-items: center; gap: 12px; font-size: 1.5rem; font-weight: 700; color: #1e40af; }
-        .logout-btn { 
-            background: #ef4444; 
-            color: white; 
-            border: none; 
-            padding: 10px 24px; 
-            border-radius: 8px; 
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        .logout-btn:hover { background: #dc2626; transform: translateY(-2px); }
 
-        /* Main Grid */
+        /* Glowing Logo */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-glow {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-glow::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%);
+            animation: pulse-glow 2s ease-in-out infinite;
+            border-radius: 50%;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(30,64,175,0.3);
+        }
+        
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo-subtitle {
+            font-size: 0.7rem;
+            color: #6b7280;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-email {
+            color: #4b5563;
+            font-size: 0.9375rem;
+            font-weight: 500;
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(239,68,68,0.3);
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(239,68,68,0.4);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 120px;
+            padding: 30px;
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Dashboard Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 25px;
+            margin-bottom: 30px;
         }
+        
         @media (max-width: 1024px) {
             .dashboard-grid { grid-template-columns: 1fr; }
         }
 
-        /* Form Sections */
-        .form-section {
+        /* Cards */
+        .card {
             background: rgba(255,255,255,0.98);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
         }
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #1e40af;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 3px solid #3b82f6;
+        
+        .card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .card-header {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #f3f4f6;
+        }
+        
+        .card-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+        }
+        
+        .icon-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .icon-green { background: linear-gradient(135deg, #10b981, #059669); }
+        .icon-orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .icon-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .icon-red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark);
         }
 
         /* Form Grid */
@@ -76,332 +252,667 @@
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
+        
         @media (max-width: 640px) {
             .form-grid { grid-template-columns: 1fr; }
         }
-        .form-group { display: flex; flex-direction: column; }
-        .form-group.full-width { grid-column: 1 / -1; }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
         
         label {
             font-size: 0.875rem;
             font-weight: 600;
             color: #374151;
             margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        input, select {
-            padding: 12px;
+        
+        input, select, textarea {
+            padding: 12px 15px;
             border: 2px solid #e5e7eb;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 0.9375rem;
+            font-family: 'Inter', sans-serif;
             transition: all 0.3s;
+            background: white;
         }
-        input:focus, select:focus {
+        
+        input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
         }
+        
         .datetime-input {
             font-family: 'Courier New', monospace;
         }
 
-        /* Services Section */
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px;
+        /* Timeline Editor */
+        .timeline-editor {
             background: #f9fafb;
-            border-radius: 6px;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .timeline-item-edit {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .timeline-item-edit.hold {
+            border-left-color: var(--warning);
+            background: #fffbeb;
+        }
+        
+        .timeline-item-edit.completed {
+            border-left-color: var(--success);
+        }
+        
+        .timeline-header-edit {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .timeline-title-input {
+            font-weight: 600;
+            color: var(--dark);
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            flex: 1;
+            margin-right: 10px;
+        }
+        
+        .timeline-status-select {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: none;
             cursor: pointer;
         }
-        .checkbox-item:hover { background: #f3f4f6; }
-        .checkbox-item input { width: auto; margin: 0; }
+        
+        .status-completed { background: #d1fae5; color: #059669; }
+        .status-current { background: #fef3c7; color: #d97706; }
+        .status-pending { background: #f3f4f6; color: #6b7280; }
+        .status-hold { background: #fee2e2; color: #dc2626; }
+        
+        .timeline-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+        
+        .btn-save-small {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-delete-small {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-hold-small {
+            background: var(--warning);
+            color: white;
+        }
 
-        /* Buttons */
+        /* Add Timeline Button */
+        .add-timeline-btn {
+            width: 100%;
+            padding: 15px;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            background: transparent;
+            color: #6b7280;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+        
+        .add-timeline-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(59,130,246,0.05);
+        }
+
+        /* Main Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
         .btn-primary {
-            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            flex: 1;
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
             color: white;
             border: none;
-            padding: 14px 32px;
-            border-radius: 10px;
+            padding: 16px 32px;
+            border-radius: 12px;
             font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             transition: all 0.3s;
-            box-shadow: 0 4px 6px rgba(5,150,105,0.3);
+            box-shadow: 0 4px 15px rgba(16,185,129,0.3);
         }
+        
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(5,150,105,0.4);
+            box-shadow: 0 8px 25px rgba(16,185,129,0.4);
+        }
+        
+        .btn-secondary {
+            flex: 1;
+            background: white;
+            color: var(--dark);
+            border: 2px solid #e5e7eb;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(59,130,246,0.05);
         }
 
         /* Shipments List */
         .shipments-section {
             background: rgba(255,255,255,0.98);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            grid-column: 1 / -1;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
+        
         .shipment-card {
             background: #f9fafb;
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 20px;
             margin-bottom: 15px;
-            border-left: 5px solid #3b82f6;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr auto;
-            gap: 15px;
+            border-left: 5px solid var(--primary);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .shipment-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .shipment-card.active {
+            background: #eff6ff;
+            border-left-color: var(--accent);
+        }
+        
+        .shipment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .shipment-id {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .shipment-route {
+            color: #6b7280;
+            font-size: 0.9375rem;
+            margin-top: 5px;
+        }
+        
+        .shipment-meta {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .meta-item {
+            display: flex;
             align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+            color: #6b7280;
         }
-        @media (max-width: 768px) {
-            .shipment-card { grid-template-columns: 1fr; }
-        }
-        .shipment-info h4 { color: #1e40af; font-size: 1.125rem; margin-bottom: 5px; }
-        .shipment-info p { color: #6b7280; font-size: 0.875rem; }
+        
         .status-badge {
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
-            text-align: center;
         }
-        .status-transit { background: #fef3c7; color: #d97706; }
-        .status-delivered { background: #d1fae5; color: #059669; }
-        .status-exception { background: #fee2e2; color: #dc2626; }
-        .status-pending { background: #f3f4f6; color: #6b7280; }
-        .delete-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.875rem;
-        }
+        
+        .badge-transit { background: #fef3c7; color: #d97706; }
+        .badge-delivered { background: #d1fae5; color: #059669; }
+        .badge-exception { background: #fee2e2; color: #dc2626; }
+        .badge-pending { background: #f3f4f6; color: #6b7280; }
 
-        /* Success Message */
-        .success-msg {
-            background: #d1fae5;
-            color: #059669;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
+        /* Edit Modal */
+        .modal-overlay {
             display: none;
-            font-weight: 600;
-            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalSlide 0.3s ease-out;
+        }
+        
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
         }
 
-        /* Receipt Preview */
-        .receipt-preview {
-            background: #f0f9ff;
-            border: 2px dashed #3b82f6;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-            text-align: center;
-            color: #3b82f6;
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: none;
+            align-items: center;
+            gap: 15px;
+            z-index: 3000;
+            animation: slideIn 0.3s ease-out;
+            border-left: 5px solid var(--success);
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .toast-icon {
+            width: 45px;
+            height: 45px;
+            background: #d1fae5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .toast-content h4 {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 3px;
+        }
+        
+        .toast-content p {
+            color: #6b7280;
+            font-size: 0.9375rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid #e5e7eb;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .quick-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .quick-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-main { padding: 15px; }
+            .user-email { display: none; }
+            .main-content { padding: 20px; margin-top: 100px; }
+            .action-buttons { flex-direction: column; }
+            .shipment-meta { flex-direction: column; gap: 10px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo">
-                <span style="font-size: 2rem;">🚛</span>
-                <div>
-                    <div>Fastline Logistics</div>
-                    <div style="font-size: 0.75rem; color: #6b7280; font-weight: 400;">Admin Dashboard</div>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="floating-icon" style="top: 10%; animation-delay: 0s;">✈️</div>
+        <div class="floating-icon" style="top: 30%; animation-delay: 3s;">🚛</div>
+        <div class="floating-icon" style="top: 50%; animation-delay: 6s;">📦</div>
+        <div class="floating-icon" style="top: 70%; animation-delay: 9s;">🌍</div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-top">
+            ⚡ Admin Dashboard | Manage Shipments & Track Deliveries in Real-Time
+        </div>
+        <div class="header-main">
+            <div class="logo-container">
+                <div class="logo-glow">
+                    <div class="logo-icon">🚛</div>
+                </div>
+                <div class="logo-text">
+                    <div class="logo-title">FASTLINE</div>
+                    <div class="logo-subtitle">Admin Portal</div>
                 </div>
             </div>
-            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+            
+            <div class="user-info">
+                <span class="user-email" id="userEmail">admin@fastline.com</span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Quick Filter -->
+        <div class="quick-actions">
+            <button class="quick-btn active" onclick="filterShipments('all')">All Shipments</button>
+            <button class="quick-btn" onclick="filterShipments('transit')">🚚 In Transit</button>
+            <button class="quick-btn" onclick="filterShipments('delivered')">✅ Delivered</button>
+            <button class="quick-btn" onclick="filterShipments('exception')">⚠️ Exception</button>
+            <button class="quick-btn" onclick="filterShipments('pending')">⏳ Pending</button>
         </div>
 
         <div class="dashboard-grid">
-            <!-- Sender Information -->
-            <div class="form-section">
-                <div class="section-title">📤 Sender's Information</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Sender's Name</label>
-                        <input type="text" id="senderName" placeholder="DENNIS CHANG">
+            <!-- Create/Edit Shipment Form -->
+            <div class="card" style="grid-column: 1 / -1;">
+                <div class="card-header">
+                    <div class="card-icon icon-blue">
+                        <i class="fas fa-plus-circle"></i>
                     </div>
-                    <div class="form-group">
-                        <label>Sender Reference</label>
-                        <input type="text" id="senderRef" placeholder="01/AB/22C3/21">
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Address</label>
-                        <input type="text" id="senderAddress" placeholder="HOUSTON TEXAS">
-                    </div>
-                    <div class="form-group">
-                        <label>Post Code</label>
-                        <input type="text" id="senderPostcode" placeholder="77001">
-                    </div>
-                    <div class="form-group">
-                        <label>Telephone</label>
-                        <input type="text" id="senderPhone" placeholder="+1(236)6836915">
-                    </div>
-                    <div class="form-group">
-                        <label>Origin Country</label>
-                        <select id="originCountry">
-                            <option value="USA">USA</option>
-                            <option value="MALAYSIA">MALAYSIA</option>
-                            <option value="SINGAPORE">SINGAPORE</option>
-                            <option value="THAILAND">THAILAND</option>
-                            <option value="CHINA">CHINA</option>
-                        </select>
-                    </div>
+                    <div class="card-title" id="formTitle">Create New Shipment</div>
                 </div>
-            </div>
 
-            <!-- Receiver Information -->
-            <div class="form-section">
-                <div class="section-title">📥 Receiver's Information</div>
                 <div class="form-grid">
+                    <!-- Tracking Number -->
                     <div class="form-group">
-                        <label>Receiver's Name</label>
-                        <input type="text" id="receiverName" placeholder="LOW SIEW CHAUN">
-                    </div>
-                    <div class="form-group">
-                        <label>Destination Country</label>
-                        <select id="destinationCountry">
-                            <option value="MALAYSIA">MALAYSIA</option>
-                            <option value="USA">USA</option>
-                            <option value="SINGAPORE">SINGAPORE</option>
-                            <option value="THAILAND">THAILAND</option>
-                            <option value="CHINA">CHINA</option>
-                        </select>
-                    </div>
-                    <div class="form-group full-width">
-                        <label>Full Address</label>
-                        <input type="text" id="receiverAddress" placeholder="NO. 56, PERSIARAN SEKSYEN 5/3, BANDAR PUTRA BERTAM, KEPALA BATAS, PULAU PINANG">
-                    </div>
-                    <div class="form-group">
-                        <label>Post Code</label>
-                        <input type="text" id="receiverPostcode" placeholder="13200">
-                    </div>
-                    <div class="form-group">
-                        <label>Telephone</label>
-                        <input type="text" id="receiverPhone" placeholder="+60135122267">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Shipment Details -->
-            <div class="form-section">
-                <div class="section-title">📦 Shipment Details</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Tracking Number</label>
+                        <label><i class="fas fa-barcode"></i> Tracking Number</label>
                         <input type="text" id="trackingNum" placeholder="FL-5326530558">
                     </div>
-                    <div class="form-group">
-                        <label>Service Type</label>
-                        <select id="serviceType">
-                            <option value="EXPRESS DELIVERY">EXPRESS DELIVERY</option>
-                            <option value="DIPLOMATIC DOCUMENT">DIPLOMATIC DOCUMENT</option>
-                            <option value="WORLD WIDE DIPLOMATIC">WORLD WIDE DIPLOMATIC</option>
-                            <option value="DOMESTIC PACKAGE">DOMESTIC PACKAGE</option>
-                            <option value="WORLD MAIL">WORLD MAIL</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Number of Pieces</label>
-                        <input type="text" id="pieces" placeholder="1 Box">
-                    </div>
-                    <div class="form-group">
-                        <label>Weight (kg)</label>
-                        <input type="text" id="weight" placeholder="30.7kg">
-                    </div>
-                    <div class="form-group">
-                        <label>X-Ray Scan Result</label>
-                        <select id="xrayResult">
-                            <option value="Non-Harmful Content (Negative)">Non-Harmful Content (Negative)</option>
-                            <option value="Cleared">Cleared</option>
-                            <option value="Pending Scan">Pending Scan</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Route Number</label>
-                        <input type="text" id="route" placeholder="00123A339">
-                    </div>
-                    <div class="form-group">
-                        <label>Shipment Value</label>
-                        <input type="text" id="shipmentValue" placeholder="1,400">
-                    </div>
-                    <div class="form-group">
-                        <label>Total Charges</label>
-                        <input type="text" id="totalCharges" placeholder="2,400">
-                    </div>
-                </div>
 
-                <div style="margin-top: 15px;">
-                    <label style="font-weight: 600; color: #374151; margin-bottom: 10px; display: block;">Service Selection</label>
-                    <div class="services-grid">
-                        <label class="checkbox-item"><input type="checkbox" id="svcDiplomatic"> DIPLOMATIC DOCUMENT</label>
-                        <label class="checkbox-item"><input type="checkbox" id="svcWorldDiplomatic"> WORLD WIDE DIPLOMATIC</label>
-                        <label class="checkbox-item"><input type="checkbox" id="svcDomestic" checked> DOMESTIC PACKAGE</label>
-                        <label class="checkbox-item"><input type="checkbox" id="svcWorldMail"> WORLD MAIL</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dates & Status -->
-            <div class="form-section">
-                <div class="section-title">📅 Dates & Timeline</div>
-                <div class="form-grid">
+                    <!-- Status -->
                     <div class="form-group">
-                        <label>Shipment Date & Time</label>
-                        <input type="datetime-local" id="shipDate" class="datetime-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Estimated Delivery</label>
-                        <input type="datetime-local" id="estDelivery" class="datetime-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Current Status</label>
-                        <select id="status">
+                        <label><i class="fas fa-info-circle"></i> Status</label>
+                        <select id="status" onchange="updateStatusTitle()">
                             <option value="transit">🚚 In Transit</option>
                             <option value="delivered">✅ Delivered</option>
                             <option value="exception">⚠️ Exception</option>
                             <option value="pending">⏳ Pending</option>
+                            <option value="hold">🛑 On Hold</option>
                         </select>
                     </div>
+
+                    <!-- Status Title -->
                     <div class="form-group">
-                        <label>Status Title</label>
+                        <label><i class="fas fa-heading"></i> Status Title</label>
                         <input type="text" id="statusTitle" placeholder="In Transit - On Schedule">
+                    </div>
+
+                    <!-- Service Type -->
+                    <div class="form-group">
+                        <label><i class="fas fa-shipping-fast"></i> Service Type</label>
+                        <select id="serviceType">
+                            <option value="EXPRESS DELIVERY">EXPRESS DELIVERY</option>
+                            <option value="AIR FREIGHT">AIR FREIGHT</option>
+                            <option value="SEA FREIGHT">SEA FREIGHT</option>
+                            <option value="ROAD FREIGHT">ROAD FREIGHT</option>
+                            <option value="DIPLOMATIC DOCUMENT">DIPLOMATIC DOCUMENT</option>
+                        </select>
+                    </div>
+
+                    <!-- Shipment Date -->
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-alt"></i> Shipment Date & Time</label>
+                        <input type="datetime-local" id="shipDate" class="datetime-input">
+                    </div>
+
+                    <!-- Estimated Delivery -->
+                    <div class="form-group">
+                        <label><i class="fas fa-clock"></i> Estimated Delivery</label>
+                        <input type="datetime-local" id="estDelivery" class="datetime-input">
+                    </div>
+
+                    <!-- Sender Info -->
+                    <div class="form-group">
+                        <label><i class="fas fa-user-tie"></i> Sender Name</label>
+                        <input type="text" id="senderName" placeholder="DENNIS CHANG">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-globe"></i> Origin Country</label>
+                        <select id="originCountry">
+                            <option value="USA">🇺🇸 USA</option>
+                            <option value="MALAYSIA">🇲🇾 MALAYSIA</option>
+                            <option value="SINGAPORE">🇸🇬 SINGAPORE</option>
+                            <option value="THAILAND">🇹🇭 THAILAND</option>
+                            <option value="CHINA">🇨🇳 CHINA</option>
+                            <option value="UK">🇬🇧 UK</option>
+                            <option value="GERMANY">🇩🇪 GERMANY</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-map-marker-alt"></i> Sender Address</label>
+                        <input type="text" id="senderAddress" placeholder="HOUSTON, TEXAS 77001">
+                    </div>
+
+                    <!-- Receiver Info -->
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Receiver Name</label>
+                        <input type="text" id="receiverName" placeholder="LOW SIEW CHAUN">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-globe-americas"></i> Destination Country</label>
+                        <select id="destinationCountry">
+                            <option value="MALAYSIA">🇲🇾 MALAYSIA</option>
+                            <option value="USA">🇺🇸 USA</option>
+                            <option value="SINGAPORE">🇸🇬 SINGAPORE</option>
+                            <option value="THAILAND">🇹🇭 THAILAND</option>
+                            <option value="CHINA">🇨🇳 CHINA</option>
+                            <option value="UK">🇬🇧 UK</option>
+                            <option value="GERMANY">🇩🇪 GERMANY</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-map-marked-alt"></i> Receiver Address</label>
+                        <input type="text" id="receiverAddress" placeholder="NO. 56, PERSIARAN SEKSYEN 5/3, BANDAR PUTRA BERTAM, KEPALA BATAS, PULAU PINANG">
+                    </div>
+
+                    <!-- Shipment Details -->
+                    <div class="form-group">
+                        <label><i class="fas fa-weight-hanging"></i> Weight</label>
+                        <input type="text" id="weight" placeholder="30.7kg">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-boxes"></i> Pieces</label>
+                        <input type="text" id="pieces" placeholder="1 Box">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-route"></i> Route Number</label>
+                        <input type="text" id="route" placeholder="00123A339">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-dollar-sign"></i> Total Charges (USD)</label>
+                        <input type="text" id="totalCharges" placeholder="2,400">
                     </div>
                 </div>
 
-                <div class="receipt-preview">
-                    <div style="font-size: 1.5rem; margin-bottom: 10px;">🧾</div>
-                    <div>This will generate an Air Way Bill matching your receipt format</div>
-                    <div style="font-size: 0.875rem; margin-top: 5px;">All fields will be saved to Firebase Database</div>
+                <!-- Timeline Editor -->
+                <div class="timeline-editor">
+                    <div class="card-header" style="margin-bottom: 15px;">
+                        <div class="card-icon icon-purple">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <div class="card-title">Shipment Timeline / Events</div>
+                    </div>
+                    
+                    <div id="timelineList">
+                        <!-- Timeline items will be added here -->
+                    </div>
+                    
+                    <button class="add-timeline-btn" onclick="addTimelineEvent()">
+                        <i class="fas fa-plus"></i>
+                        Add New Event
+                    </button>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="saveShipment()">
+                        <i class="fas fa-save"></i>
+                        <span id="saveBtnText">Save Shipment</span>
+                    </button>
+                    <button class="btn-secondary" onclick="clearForm()">
+                        <i class="fas fa-eraser"></i>
+                        Clear Form
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Save Button -->
-        <button class="btn-primary" onclick="saveShipment()">💾 SAVE SHIPMENT TO DATABASE</button>
-        <div class="success-msg" id="successMsg">✅ Shipment saved successfully!</div>
+        <!-- Shipments List -->
+        <div class="shipments-section">
+            <div class="card-header" style="margin-bottom: 20px;">
+                <div class="card-icon icon-green">
+                    <i class="fas fa-list"></i>
+                </div>
+                <div class="card-title">All Shipments (<span id="shipmentCount">0</span>)</div>
+            </div>
+            
+            <div id="shipmentsList">
+                <!-- Shipments will be loaded here -->
+            </div>
+        </div>
+    </main>
 
-        <!-- All Shipments -->
-        <div class="shipments-section" style="margin-top: 30px;">
-            <div class="section-title">📋 All Shipments</div>
-            <div id="shipmentsList"></div>
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">✓</div>
+        <div class="toast-content">
+            <h4>Success!</h4>
+            <p id="toastMessage">Shipment saved successfully</p>
         </div>
     </div>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
     <script>
         // Firebase Config
@@ -410,125 +921,233 @@
             authDomain: "fastline-logistics.firebaseapp.com",
             projectId: "fastline-logistics",
         };
+        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const auth = firebase.auth();
 
-        // Check auth
-        firebase.auth().onAuthStateChanged(user => {
-            if (!user) window.location.href = "login.html";
+        // Global Variables
+        let currentEditingId = null;
+        let timelineEvents = [];
+        let allShipments = [];
+        let currentFilter = 'all';
+
+        // Check Auth
+        auth.onAuthStateChanged(user => {
+            if (!user) {
+                window.location.href = "login.html";
+            } else {
+                document.getElementById('userEmail').textContent = user.email;
+            }
         });
 
         function logout() {
-            firebase.auth().signOut().then(() => window.location.href = "login.html");
+            auth.signOut().then(() => window.location.href = "login.html");
         }
 
-        function saveShipment() {
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set default dates
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('shipDate').value = now.toISOString().slice(0, 16);
+            
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 2);
+            document.getElementById('estDelivery').value = tomorrow.toISOString().slice(0, 16);
+            
+            // Add default timeline event
+            addTimelineEvent('Shipment Created', 'Origin Facility', 'current');
+            
+            // Load shipments
+            loadShipments();
+        });
+
+        function updateStatusTitle() {
+            const status = document.getElementById('status').value;
+            const titles = {
+                transit: 'In Transit - On Schedule',
+                delivered: 'Delivered Successfully',
+                exception: 'Exception - Delayed',
+                pending: 'Pending Pickup',
+                hold: 'On Hold - Processing'
+            };
+            document.getElementById('statusTitle').value = titles[status] || '';
+        }
+
+        function addTimelineEvent(title = '', location = '', status = 'pending') {
+            const id = Date.now();
+            const event = { id, title: title || 'New Event', location: location || '', status, date: new Date().toLocaleString() };
+            timelineEvents.push(event);
+            renderTimeline();
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timelineList');
+            container.innerHTML = timelineEvents.map((event, index) => `
+                <div class="timeline-item-edit ${event.status}" id="event-${event.id}">
+                    <div class="timeline-header-edit">
+                        <input type="text" class="timeline-title-input" 
+                               value="${event.title}" 
+                               onchange="updateEventTitle(${event.id}, this.value)"
+                               placeholder="Event Title">
+                        <select class="timeline-status-select status-${event.status}" 
+                                onchange="updateEventStatus(${event.id}, this.value)">
+                            <option value="completed" ${event.status === 'completed' ? 'selected' : ''}>✓ Completed</option>
+                            <option value="current" ${event.status === 'current' ? 'selected' : ''}>● Current</option>
+                            <option value="pending" ${event.status === 'pending' ? 'selected' : ''}>○ Pending</option>
+                            <option value="hold" ${event.status === 'hold' ? 'selected' : ''}>🛑 Hold</option>
+                        </select>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="text" placeholder="Location" 
+                               value="${event.location}" 
+                               onchange="updateEventLocation(${event.id}, this.value)"
+                               style="padding: 8px 12px; font-size: 0.875rem;">
+                        <input type="text" placeholder="Date & Time" 
+                               value="${event.date}" 
+                               onchange="updateEventDate(${event.id}, this.value)"
+                               style="padding: 8px 12px; font-size: 0.875rem;">
+                    </div>
+                    <div class="timeline-actions">
+                        <button class="btn-small btn-save-small" onclick="moveEventUp(${index})" ${index === 0 ? 'disabled' : ''}>
+                            <i class="fas fa-arrow-up"></i> Up
+                        </button>
+                        <button class="btn-small btn-save-small" onclick="moveEventDown(${index})" ${index === timelineEvents.length - 1 ? 'disabled' : ''}>
+                            <i class="fas fa-arrow-down"></i> Down
+                        </button>
+                        <button class="btn-small btn-hold-small" onclick="toggleHoldEvent(${event.id})">
+                            <i class="fas fa-pause"></i> ${event.status === 'hold' ? 'Resume' : 'Hold'}
+                        </button>
+                        <button class="btn-small btn-delete-small" onclick="deleteEvent(${event.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateEventTitle(id, value) {
+            const event = timelineEvents.find(e => e.id === id);
+            if (event) event.title = value;
+        }
+
+        function updateEventLocation(id, value) {
+            const event = timelineEvents.find(e => e.id === id);
+            if (event) event.location = value;
+        }
+
+        function updateEventDate(id, value) {
+            const event = timelineEvents.find(e => e.id === id);
+            if (event) event.date = value;
+        }
+
+        function updateEventStatus(id, value) {
+            const event = timelineEvents.find(e => e.id === id);
+            if (event) {
+                event.status = value;
+                renderTimeline();
+            }
+        }
+
+        function toggleHoldEvent(id) {
+            const event = timelineEvents.find(e => e.id === id);
+            if (event) {
+                event.status = event.status === 'hold' ? 'pending' : 'hold';
+                renderTimeline();
+            }
+        }
+
+        function moveEventUp(index) {
+            if (index > 0) {
+                [timelineEvents[index], timelineEvents[index - 1]] = [timelineEvents[index - 1], timelineEvents[index]];
+                renderTimeline();
+            }
+        }
+
+        function moveEventDown(index) {
+            if (index < timelineEvents.length - 1) {
+                [timelineEvents[index], timelineEvents[index + 1]] = [timelineEvents[index + 1], timelineEvents[index]];
+                renderTimeline();
+            }
+        }
+
+        function deleteEvent(id) {
+            timelineEvents = timelineEvents.filter(e => e.id !== id);
+            renderTimeline();
+        }
+
+        async function saveShipment() {
             const trackingNum = document.getElementById('trackingNum').value.trim().toUpperCase();
             
             if (!trackingNum) {
-                alert("Please enter a tracking number");
+                showToast('Error', 'Please enter a tracking number', 'error');
                 return;
             }
 
-            // Get all form values
             const data = {
-                // Tracking
                 trackingNumber: trackingNum,
+                status: document.getElementById('status').value,
+                statusTitle: document.getElementById('statusTitle').value,
+                statusDesc: getStatusDesc(document.getElementById('status').value),
                 
-                // Sender Info
                 sender: {
                     name: document.getElementById('senderName').value || 'Unknown',
-                    reference: document.getElementById('senderRef').value || '',
                     address: document.getElementById('senderAddress').value || '',
-                    postcode: document.getElementById('senderPostcode').value || '',
-                    phone: document.getElementById('senderPhone').value || '',
-                    country: document.getElementById('originCountry').value || 'USA'
+                    country: document.getElementById('originCountry').value || 'USA',
+                    phone: '',
+                    reference: ''
                 },
                 
-                // Receiver Info
                 receiver: {
                     name: document.getElementById('receiverName').value || 'Unknown',
                     address: document.getElementById('receiverAddress').value || '',
-                    postcode: document.getElementById('receiverPostcode').value || '',
-                    phone: document.getElementById('receiverPhone').value || '',
                     country: document.getElementById('destinationCountry').value || 'MALAYSIA',
-                    destination: document.getElementById('destinationCountry').value || 'MALAYSIA'
+                    postcode: '',
+                    phone: ''
                 },
                 
-                // Shipment Details
                 shipment: {
-                    serviceType: document.getElementById('serviceType').value || 'EXPRESS DELIVERY',
-                    pieces: document.getElementById('pieces').value || '1 Box',
+                    serviceType: document.getElementById('serviceType').value,
                     weight: document.getElementById('weight').value || '0 kg',
-                    xrayResult: document.getElementById('xrayResult').value || 'Non-Harmful Content (Negative)',
+                    pieces: document.getElementById('pieces').value || '1 Box',
                     route: document.getElementById('route').value || '',
-                    value: document.getElementById('shipmentValue').value || '',
-                    totalCharges: document.getElementById('totalCharges').value || ''
+                    totalCharges: document.getElementById('totalCharges').value || '',
+                    xrayResult: 'Non-Harmful Content (Negative)'
                 },
                 
-                // Services selected
-                services: {
-                    diplomatic: document.getElementById('svcDiplomatic').checked,
-                    worldDiplomatic: document.getElementById('svcWorldDiplomatic').checked,
-                    domestic: document.getElementById('svcDomestic').checked,
-                    worldMail: document.getElementById('svcWorldMail').checked
-                },
+                shipDate: document.getElementById('shipDate').value,
+                estDelivery: document.getElementById('estDelivery').value,
                 
-                // Dates
-                shipDate: document.getElementById('shipDate').value || new Date().toISOString(),
-                estDelivery: document.getElementById('estDelivery').value || '',
+                timeline: timelineEvents.map(e => ({
+                    title: e.title,
+                    location: e.location,
+                    date: e.date,
+                    status: e.status
+                })),
                 
-                // Status
-                status: document.getElementById('status').value || 'transit',
-                statusTitle: document.getElementById('statusTitle').value || 'In Transit',
-                statusDesc: getStatusDesc(document.getElementById('status').value),
-                
-                // Facts for display
                 facts: {
-                    shipper: (document.getElementById('senderName').value || 'Unknown') + ', ' + 
-                             (document.getElementById('senderAddress').value || 'USA') + ', ' + 
-                             (document.getElementById('originCountry').value || 'USA'),
-                    consignee: (document.getElementById('receiverName').value || 'Unknown') + ', ' + 
-                                (document.getElementById('receiverAddress').value || 'MALAYSIA'),
+                    shipper: `${document.getElementById('senderName').value || 'Unknown'}, ${document.getElementById('senderAddress').value || 'USA'}, ${document.getElementById('originCountry').value || 'USA'}`,
+                    consignee: `${document.getElementById('receiverName').value || 'Unknown'}, ${document.getElementById('receiverAddress').value || 'MALAYSIA'}`,
                     origin: document.getElementById('originCountry').value || 'USA',
                     destination: document.getElementById('destinationCountry').value || 'MALAYSIA',
                     shipDate: formatDate(document.getElementById('shipDate').value),
                     estDelivery: formatDate(document.getElementById('estDelivery').value),
-                    service: document.getElementById('serviceType').value || 'Express Delivery'
+                    service: document.getElementById('serviceType').value
                 },
                 
-                // Initial timeline
-                timeline: [
-                    {
-                        title: 'Shipment Created',
-                        location: document.getElementById('senderAddress').value || 'Origin Facility',
-                        date: formatDateTime(document.getElementById('shipDate').value),
-                        status: 'completed'
-                    },
-                    {
-                        title: 'In Transit',
-                        location: 'En route to ' + (document.getElementById('destinationCountry').value || 'Destination'),
-                        date: new Date().toLocaleString('en-US'),
-                        status: 'current'
-                    }
-                ],
-                
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                createdAt: currentEditingId ? undefined : new Date().toISOString()
             };
 
-            // Save to Firebase
-            db.collection("shipments").doc(trackingNum).set(data)
-                .then(() => {
-                    document.getElementById('successMsg').style.display = 'block';
-                    setTimeout(() => {
-                        document.getElementById('successMsg').style.display = 'none';
-                    }, 3000);
-                    clearForm();
-                })
-                .catch(error => {
-                    alert("Error saving: " + error.message);
-                });
+            try {
+                await db.collection("shipments").doc(trackingNum).set(data, { merge: true });
+                showToast('Success', currentEditingId ? 'Shipment updated!' : 'Shipment created!', 'success');
+                clearForm();
+                loadShipments();
+            } catch (error) {
+                showToast('Error', error.message, 'error');
+            }
         }
 
         function getStatusDesc(status) {
@@ -536,7 +1155,8 @@
                 delivered: 'Your consignment has been delivered successfully',
                 transit: 'Your consignment is on its way to the destination',
                 exception: 'There is an issue with your shipment',
-                pending: 'Waiting for pickup at origin facility'
+                pending: 'Waiting for pickup at origin facility',
+                hold: 'Shipment is on hold pending further processing'
             };
             return descs[status] || 'Processing';
         }
@@ -547,75 +1167,166 @@
             return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         }
 
-        function formatDateTime(dateString) {
-            if (!dateString) return new Date().toLocaleString('en-US');
-            return new Date(dateString).toLocaleString('en-US');
+        function loadShipments() {
+            db.collection("shipments").orderBy("updatedAt", "desc").onSnapshot(snapshot => {
+                allShipments = [];
+                snapshot.forEach(doc => {
+                    allShipments.push({ id: doc.id, ...doc.data() });
+                });
+                renderShipmentsList();
+            });
         }
 
-        function clearForm() {
-            document.getElementById('trackingNum').value = '';
-            document.getElementById('senderName').value = '';
-            document.getElementById('senderRef').value = '';
-            document.getElementById('senderAddress').value = '';
-            document.getElementById('senderPostcode').value = '';
-            document.getElementById('senderPhone').value = '';
-            document.getElementById('receiverName').value = '';
-            document.getElementById('receiverAddress').value = '';
-            document.getElementById('receiverPostcode').value = '';
-            document.getElementById('receiverPhone').value = '';
-            document.getElementById('pieces').value = '';
-            document.getElementById('weight').value = '';
-            document.getElementById('route').value = '';
-            document.getElementById('shipmentValue').value = '';
-            document.getElementById('totalCharges').value = '';
-            document.getElementById('statusTitle').value = '';
-        }
-
-        // Load all shipments
-        db.collection("shipments").orderBy("createdAt", "desc").onSnapshot(snapshot => {
-            const list = document.getElementById('shipmentsList');
-            list.innerHTML = '';
+        function renderShipmentsList() {
+            const filtered = currentFilter === 'all' 
+                ? allShipments 
+                : allShipments.filter(s => s.status === currentFilter);
             
-            if (snapshot.empty) {
-                list.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 40px;">No shipments yet. Create one above!</p>';
+            document.getElementById('shipmentCount').textContent = filtered.length;
+            
+            const container = document.getElementById('shipmentsList');
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 40px;">No shipments found</p>';
                 return;
             }
             
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const div = document.createElement('div');
-                div.className = 'shipment-card';
-                div.innerHTML = `
-                    <div class="shipment-info">
-                        <h4>📦 ${doc.id}</h4>
-                        <p>${data.sender?.name || 'Unknown'} (${data.sender?.country || '?'}) → 
-                           ${data.receiver?.name || 'Unknown'} (${data.receiver?.country || '?'})</p>
-                        <p style="margin-top: 5px; font-size: 0.8rem;">
-                           📅 ${formatDate(data.shipDate)} | ⚖️ ${data.shipment?.weight || '-'} | 
-                           💰 ${data.shipment?.totalCharges || '-'} USD
-                        </p>
+            container.innerHTML = filtered.map(s => `
+                <div class="shipment-card ${currentEditingId === s.id ? 'active' : ''}" onclick="editShipment('${s.id}')">
+                    <div class="shipment-header">
+                        <div>
+                            <div class="shipment-id">${s.id}</div>
+                            <div class="shipment-route">
+                                ${s.sender?.country || '?'} → ${s.receiver?.country || '?'} | 
+                                ${s.shipment?.serviceType || 'Standard'}
+                            </div>
+                        </div>
+                        <span class="status-badge badge-${s.status || 'pending'}">${s.status || 'pending'}</span>
                     </div>
-                    <div>
-                        <span class="status-badge status-${data.status || 'pending'}">${data.status || 'pending'}</span>
+                    <div class="shipment-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-user"></i>
+                            ${s.receiver?.name || 'Unknown'}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            ${formatDate(s.shipDate)}
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            ${s.timeline?.length || 0} events
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-dollar-sign"></i>
+                            ${s.shipment?.totalCharges || '-'} USD
+                        </div>
                     </div>
-                    <div style="text-align: center; color: #6b7280; font-size: 0.875rem;">
-                        <div>🕐</div>
-                        <div>${data.timeline?.length || 0} events</div>
-                    </div>
-                    <button class="delete-btn" onclick="deleteShipment('${doc.id}')">🗑️ Delete</button>
-                `;
-                list.appendChild(div);
-            });
-        });
-
-        function deleteShipment(trackingNum) {
-            if (confirm('Are you sure you want to delete ' + trackingNum + '?')) {
-                db.collection("shipments").doc(trackingNum).delete();
-            }
+                </div>
+            `).join('');
         }
 
-        // Set default dates
-        document.getElementById('shipDate').value = new Date().toISOString().slice(0, 16);
+        function editShipment(trackingNum) {
+            const shipment = allShipments.find(s => s.id === trackingNum);
+            if (!shipment) return;
+            
+            currentEditingId = trackingNum;
+            
+            // Fill form
+            document.getElementById('trackingNum').value = trackingNum;
+            document.getElementById('status').value = shipment.status || 'transit';
+            document.getElementById('statusTitle').value = shipment.statusTitle || '';
+            document.getElementById('serviceType').value = shipment.shipment?.serviceType || 'EXPRESS DELIVERY';
+            document.getElementById('shipDate').value = shipment.shipDate || '';
+            document.getElementById('estDelivery').value = shipment.estDelivery || '';
+            document.getElementById('senderName').value = shipment.sender?.name || '';
+            document.getElementById('originCountry').value = shipment.sender?.country || 'USA';
+            document.getElementById('senderAddress').value = shipment.sender?.address || '';
+            document.getElementById('receiverName').value = shipment.receiver?.name || '';
+            document.getElementById('destinationCountry').value = shipment.receiver?.country || 'MALAYSIA';
+            document.getElementById('receiverAddress').value = shipment.receiver?.address || '';
+            document.getElementById('weight').value = shipment.shipment?.weight || '';
+            document.getElementById('pieces').value = shipment.shipment?.pieces || '';
+            document.getElementById('route').value = shipment.shipment?.route || '';
+            document.getElementById('totalCharges').value = shipment.shipment?.totalCharges || '';
+            
+            // Load timeline
+            timelineEvents = (shipment.timeline || []).map((t, i) => ({
+                id: Date.now() + i,
+                title: t.title,
+                location: t.location,
+                date: t.date,
+                status: t.status
+            }));
+            renderTimeline();
+            
+            // Update UI
+            document.getElementById('formTitle').textContent = 'Edit Shipment';
+            document.getElementById('saveBtnText').textContent = 'Update Shipment';
+            document.getElementById('trackingNum').disabled = true;
+            
+            // Scroll to form
+            document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearForm() {
+            currentEditingId = null;
+            document.getElementById('formTitle').textContent = 'Create New Shipment';
+            document.getElementById('saveBtnText').textContent = 'Save Shipment';
+            document.getElementById('trackingNum').disabled = false;
+            document.getElementById('trackingNum').value = '';
+            
+            // Reset all fields
+            document.querySelectorAll('input:not([type="datetime-local"]), select').forEach(el => {
+                if (el.id !== 'shipDate' && el.id !== 'estDelivery') el.value = '';
+            });
+            
+            // Reset dates
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('shipDate').value = now.toISOString().slice(0, 16);
+            
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 2);
+            document.getElementById('estDelivery').value = tomorrow.toISOString().slice(0, 16);
+            
+            // Reset timeline
+            timelineEvents = [];
+            addTimelineEvent('Shipment Created', 'Origin Facility', 'current');
+            
+            // Reset filter buttons
+            document.querySelectorAll('.quick-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.quick-btn').classList.add('active');
+            currentFilter = 'all';
+            renderShipmentsList();
+        }
+
+        function filterShipments(status) {
+            currentFilter = status;
+            
+            // Update buttons
+            document.querySelectorAll('.quick-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(status) || (status === 'all' && btn.textContent.includes('All'))) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            renderShipmentsList();
+        }
+
+        function showToast(title, message, type) {
+            const toast = document.getElementById('toast');
+            toast.style.borderLeftColor = type === 'error' ? '#ef4444' : '#10b981';
+            toast.querySelector('.toast-icon').textContent = type === 'error' ? '✗' : '✓';
+            toast.querySelector('.toast-icon').style.background = type === 'error' ? '#fee2e2' : '#d1fae5';
+            toast.querySelector('h4').textContent = title;
+            document.getElementById('toastMessage').textContent = message;
+            
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
     </script>
 </body>
 </html>
