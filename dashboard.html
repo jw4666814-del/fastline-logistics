@@ -557,7 +557,8 @@
         .badge-pending { background: #f3f4f6; color: #6b7280; }
         .badge-hold { background: #fef3c7; color: #92400e; }
 
-        .toast {
+        /* FIXED TOAST STYLES */
+        #toast-notification {
             position: fixed;
             bottom: 30px;
             right: 30px;
@@ -574,7 +575,7 @@
             max-width: 400px;
         }
         
-        .toast.error {
+        #toast-notification.error {
             border-left-color: var(--danger);
         }
         
@@ -583,7 +584,7 @@
             to { transform: translateX(0); opacity: 1; }
         }
         
-        .toast-icon {
+        .toast-icon-box {
             width: 45px;
             height: 45px;
             background: #d1fae5;
@@ -595,17 +596,17 @@
             flex-shrink: 0;
         }
         
-        .toast.error .toast-icon {
+        #toast-notification.error .toast-icon-box {
             background: #fee2e2;
         }
         
-        .toast-content h4 {
+        .toast-content-box h4 {
             font-weight: 700;
             color: var(--dark);
             margin-bottom: 3px;
         }
         
-        .toast-content p {
+        .toast-content-box p {
             color: #6b7280;
             font-size: 0.9375rem;
         }
@@ -886,12 +887,12 @@
         </div>
     </main>
 
-    <!-- Toast Notification -->
-    <div class="toast" id="toast">
-        <div class="toast-icon">✓</div>
-        <div class="toast-content">
-            <h4>Success!</h4>
-            <p id="toastMessage">Shipment saved successfully</p>
+    <!-- FIXED TOAST NOTIFICATION - Using unique IDs -->
+    <div id="toast-notification">
+        <div class="toast-icon-box">✓</div>
+        <div class="toast-content-box">
+            <h4 id="toast-title">Success!</h4>
+            <p id="toast-message">Shipment saved successfully</p>
         </div>
     </div>
 
@@ -940,7 +941,8 @@
                 window.location.href = "login.html";
             } else {
                 console.log("✅ User logged in:", user.email);
-                document.getElementById('userEmail').textContent = user.email;
+                const emailEl = document.getElementById('userEmail');
+                if (emailEl) emailEl.textContent = user.email;
             }
         });
 
@@ -961,11 +963,13 @@
             // Set default dates
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('shipDate').value = now.toISOString().slice(0, 16);
+            const shipDateEl = document.getElementById('shipDate');
+            if (shipDateEl) shipDateEl.value = now.toISOString().slice(0, 16);
             
             const tomorrow = new Date(now);
             tomorrow.setDate(tomorrow.getDate() + 2);
-            document.getElementById('estDelivery').value = tomorrow.toISOString().slice(0, 16);
+            const estDeliveryEl = document.getElementById('estDelivery');
+            if (estDeliveryEl) estDeliveryEl.value = tomorrow.toISOString().slice(0, 16);
             
             // Add default timeline event
             addTimelineEvent('Shipment Created', 'Origin Facility', 'current');
@@ -979,13 +983,32 @@
         // ==========================================
         function showDebug(message) {
             const debugDiv = document.getElementById('debugInfo');
-            debugDiv.style.display = 'block';
-            debugDiv.innerHTML += message + '<br>';
+            if (debugDiv) {
+                debugDiv.style.display = 'block';
+                debugDiv.innerHTML += message + '<br>';
+            }
             console.log("DEBUG:", message);
         }
 
+        // FIXED: Safe element access
+        function safeGetElement(id) {
+            const el = document.getElementById(id);
+            if (!el) console.warn(`Element not found: ${id}`);
+            return el;
+        }
+
+        // FIXED: Safe text content setting
+        function safeSetText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        }
+
         function updateStatusTitle() {
-            const status = document.getElementById('status').value;
+            const statusEl = safeGetElement('status');
+            const titleEl = safeGetElement('statusTitle');
+            if (!statusEl || !titleEl) return;
+            
+            const status = statusEl.value;
             const titles = {
                 transit: 'In Transit - On Schedule',
                 delivered: 'Delivered Successfully',
@@ -993,9 +1016,9 @@
                 pending: 'Pending Pickup',
                 hold: 'On Hold - Processing'
             };
-            const currentTitle = document.getElementById('statusTitle').value;
+            const currentTitle = titleEl.value;
             if (!currentTitle || Object.values(titles).includes(currentTitle)) {
-                document.getElementById('statusTitle').value = titles[status] || '';
+                titleEl.value = titles[status] || '';
             }
         }
 
@@ -1020,7 +1043,8 @@
 
         function renderTimeline() {
             console.log("🎨 Rendering timeline:", timelineEvents.length, "events");
-            const container = document.getElementById('timelineList');
+            const container = safeGetElement('timelineList');
+            if (!container) return;
             
             if (timelineEvents.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 20px;">No timeline events. Click "Add New Event" to create one.</p>';
@@ -1082,34 +1106,24 @@
 
         function updateEventTitle(id, value) {
             const event = timelineEvents.find(e => e.id === id);
-            if (event) {
-                event.title = value;
-                console.log("✏️ Updated event title:", id, value);
-            }
+            if (event) event.title = value;
         }
 
         function updateEventLocation(id, value) {
             const event = timelineEvents.find(e => e.id === id);
-            if (event) {
-                event.location = value;
-                console.log("✏️ Updated event location:", id, value);
-            }
+            if (event) event.location = value;
         }
 
         function updateEventDate(id, value) {
             const event = timelineEvents.find(e => e.id === id);
-            if (event) {
-                event.date = value;
-                console.log("✏️ Updated event date:", id, value);
-            }
+            if (event) event.date = value;
         }
 
         function updateEventStatus(id, value) {
             const event = timelineEvents.find(e => e.id === id);
             if (event) {
                 event.status = value;
-                console.log("✏️ Updated event status:", id, value);
-                renderTimeline(); // Re-render to update styling
+                renderTimeline();
             }
         }
 
@@ -1117,7 +1131,6 @@
             const event = timelineEvents.find(e => e.id === id);
             if (event) {
                 event.status = event.status === 'hold' ? 'pending' : 'hold';
-                console.log("⏸️ Toggled hold:", id, event.status);
                 renderTimeline();
             }
         }
@@ -1152,28 +1165,38 @@
             console.log("💾 Starting save shipment...");
             
             // Validation
-            const trackingNum = document.getElementById('trackingNum').value.trim().toUpperCase();
+            const trackingNumEl = safeGetElement('trackingNum');
+            const senderNameEl = safeGetElement('senderName');
+            const receiverNameEl = safeGetElement('receiverName');
+            const shipDateEl = safeGetElement('shipDate');
+            
+            if (!trackingNumEl || !senderNameEl || !receiverNameEl || !shipDateEl) {
+                showToast('Error', 'Form elements not found. Please refresh the page.', 'error');
+                return;
+            }
+            
+            const trackingNum = trackingNumEl.value.trim().toUpperCase();
             if (!trackingNum) {
                 showToast('Error', 'Please enter a tracking number', 'error');
-                document.getElementById('trackingNum').focus();
+                trackingNumEl.focus();
                 return;
             }
 
-            const senderName = document.getElementById('senderName').value.trim();
+            const senderName = senderNameEl.value.trim();
             if (!senderName) {
                 showToast('Error', 'Please enter sender name', 'error');
-                document.getElementById('senderName').focus();
+                senderNameEl.focus();
                 return;
             }
 
-            const receiverName = document.getElementById('receiverName').value.trim();
+            const receiverName = receiverNameEl.value.trim();
             if (!receiverName) {
                 showToast('Error', 'Please enter receiver name', 'error');
-                document.getElementById('receiverName').focus();
+                receiverNameEl.focus();
                 return;
             }
 
-            const shipDate = document.getElementById('shipDate').value;
+            const shipDate = shipDateEl.value;
             if (!shipDate) {
                 showToast('Error', 'Please select shipment date', 'error');
                 return;
@@ -1181,45 +1204,52 @@
 
             isLoading = true;
             const saveBtn = document.querySelector('.btn-primary');
-            const originalText = saveBtn.innerHTML;
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-            saveBtn.disabled = true;
+            const originalText = saveBtn ? saveBtn.innerHTML : 'Save';
+            if (saveBtn) {
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                saveBtn.disabled = true;
+            }
 
             try {
-                // Build data object
+                // Get all form values safely
+                const getValue = (id) => {
+                    const el = safeGetElement(id);
+                    return el ? el.value : '';
+                };
+
                 const data = {
                     trackingNumber: trackingNum,
-                    status: document.getElementById('status').value || 'transit',
-                    statusTitle: document.getElementById('statusTitle').value || 'In Transit',
-                    statusDesc: getStatusDesc(document.getElementById('status').value),
+                    status: getValue('status') || 'transit',
+                    statusTitle: getValue('statusTitle') || 'In Transit',
+                    statusDesc: getStatusDesc(getValue('status')),
                     
                     sender: {
                         name: senderName,
-                        address: document.getElementById('senderAddress').value || '',
-                        country: document.getElementById('originCountry').value || 'USA',
+                        address: getValue('senderAddress'),
+                        country: getValue('originCountry') || 'USA',
                         phone: '',
                         reference: ''
                     },
                     
                     receiver: {
                         name: receiverName,
-                        address: document.getElementById('receiverAddress').value || '',
-                        country: document.getElementById('destinationCountry').value || 'MALAYSIA',
+                        address: getValue('receiverAddress'),
+                        country: getValue('destinationCountry') || 'MALAYSIA',
                         postcode: '',
                         phone: ''
                     },
                     
                     shipment: {
-                        serviceType: document.getElementById('serviceType').value || 'EXPRESS DELIVERY',
-                        weight: document.getElementById('weight').value || '0 kg',
-                        pieces: document.getElementById('pieces').value || '1 Box',
-                        route: document.getElementById('route').value || '',
-                        totalCharges: document.getElementById('totalCharges').value || '',
+                        serviceType: getValue('serviceType') || 'EXPRESS DELIVERY',
+                        weight: getValue('weight') || '0 kg',
+                        pieces: getValue('pieces') || '1 Box',
+                        route: getValue('route'),
+                        totalCharges: getValue('totalCharges'),
                         xrayResult: 'Non-Harmful Content (Negative)'
                     },
                     
                     shipDate: shipDate,
-                    estDelivery: document.getElementById('estDelivery').value || '',
+                    estDelivery: getValue('estDelivery'),
                     
                     timeline: timelineEvents.map(e => ({
                         title: e.title,
@@ -1229,13 +1259,13 @@
                     })),
                     
                     facts: {
-                        shipper: `${senderName}, ${document.getElementById('senderAddress').value || 'USA'}, ${document.getElementById('originCountry').value || 'USA'}`,
-                        consignee: `${receiverName}, ${document.getElementById('receiverAddress').value || 'MALAYSIA'}`,
-                        origin: document.getElementById('originCountry').value || 'USA',
-                        destination: document.getElementById('destinationCountry').value || 'MALAYSIA',
+                        shipper: `${senderName}, ${getValue('senderAddress') || 'USA'}, ${getValue('originCountry') || 'USA'}`,
+                        consignee: `${receiverName}, ${getValue('receiverAddress') || 'MALAYSIA'}`,
+                        origin: getValue('originCountry') || 'USA',
+                        destination: getValue('destinationCountry') || 'MALAYSIA',
                         shipDate: formatDate(shipDate),
-                        estDelivery: formatDate(document.getElementById('estDelivery').value),
-                        service: document.getElementById('serviceType').value || 'Express Delivery'
+                        estDelivery: formatDate(getValue('estDelivery')),
+                        service: getValue('serviceType') || 'Express Delivery'
                     },
                     
                     updatedAt: new Date().toISOString()
@@ -1263,8 +1293,10 @@
                 showToast('Error', 'Failed to save: ' + error.message, 'error');
             } finally {
                 isLoading = false;
-                saveBtn.innerHTML = originalText;
-                saveBtn.disabled = false;
+                if (saveBtn) {
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.disabled = false;
+                }
             }
         }
 
@@ -1315,9 +1347,10 @@
                 ? allShipments 
                 : allShipments.filter(s => s.status === currentFilter);
             
-            document.getElementById('shipmentCount').textContent = filtered.length;
+            safeSetText('shipmentCount', filtered.length);
             
-            const container = document.getElementById('shipmentsList');
+            const container = safeGetElement('shipmentsList');
+            if (!container) return;
             
             if (filtered.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 40px;">No shipments found</p>';
@@ -1372,23 +1405,29 @@
             
             currentEditingId = trackingNum;
             
+            // Helper to safely set value
+            const setValue = (id, value) => {
+                const el = safeGetElement(id);
+                if (el) el.value = value || '';
+            };
+            
             // Fill form fields
-            document.getElementById('trackingNum').value = trackingNum;
-            document.getElementById('status').value = shipment.status || 'transit';
-            document.getElementById('statusTitle').value = shipment.statusTitle || '';
-            document.getElementById('serviceType').value = shipment.shipment?.serviceType || 'EXPRESS DELIVERY';
-            document.getElementById('shipDate').value = shipment.shipDate || '';
-            document.getElementById('estDelivery').value = shipment.estDelivery || '';
-            document.getElementById('senderName').value = shipment.sender?.name || '';
-            document.getElementById('originCountry').value = shipment.sender?.country || 'USA';
-            document.getElementById('senderAddress').value = shipment.sender?.address || '';
-            document.getElementById('receiverName').value = shipment.receiver?.name || '';
-            document.getElementById('destinationCountry').value = shipment.receiver?.country || 'MALAYSIA';
-            document.getElementById('receiverAddress').value = shipment.receiver?.address || '';
-            document.getElementById('weight').value = shipment.shipment?.weight || '';
-            document.getElementById('pieces').value = shipment.shipment?.pieces || '';
-            document.getElementById('route').value = shipment.shipment?.route || '';
-            document.getElementById('totalCharges').value = shipment.shipment?.totalCharges || '';
+            setValue('trackingNum', trackingNum);
+            setValue('status', shipment.status || 'transit');
+            setValue('statusTitle', shipment.statusTitle || '');
+            setValue('serviceType', shipment.shipment?.serviceType || 'EXPRESS DELIVERY');
+            setValue('shipDate', shipment.shipDate || '');
+            setValue('estDelivery', shipment.estDelivery || '');
+            setValue('senderName', shipment.sender?.name || '');
+            setValue('originCountry', shipment.sender?.country || 'USA');
+            setValue('senderAddress', shipment.sender?.address || '');
+            setValue('receiverName', shipment.receiver?.name || '');
+            setValue('destinationCountry', shipment.receiver?.country || 'MALAYSIA');
+            setValue('receiverAddress', shipment.receiver?.address || '');
+            setValue('weight', shipment.shipment?.weight || '');
+            setValue('pieces', shipment.shipment?.pieces || '');
+            setValue('route', shipment.shipment?.route || '');
+            setValue('totalCharges', shipment.shipment?.totalCharges || '');
             
             // Load timeline
             timelineEvents = (shipment.timeline || []).map((t, i) => ({
@@ -1401,12 +1440,14 @@
             renderTimeline();
             
             // Update UI
-            document.getElementById('formTitle').textContent = 'Edit Shipment';
-            document.getElementById('saveBtnText').textContent = 'Update Shipment';
-            document.getElementById('trackingNum').disabled = true;
+            safeSetText('formTitle', 'Edit Shipment');
+            safeSetText('saveBtnText', 'Update Shipment');
+            const trackingEl = safeGetElement('trackingNum');
+            if (trackingEl) trackingEl.disabled = true;
             
             // Scroll to form
-            document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+            const card = document.querySelector('.card');
+            if (card) card.scrollIntoView({ behavior: 'smooth' });
             
             // Refresh list to show active state
             renderShipmentsList();
@@ -1419,27 +1460,34 @@
             console.log("🧹 Clearing form...");
             
             currentEditingId = null;
-            document.getElementById('formTitle').textContent = 'Create New Shipment';
-            document.getElementById('saveBtnText').textContent = 'Save Shipment';
-            document.getElementById('trackingNum').disabled = false;
+            safeSetText('formTitle', 'Create New Shipment');
+            safeSetText('saveBtnText', 'Save Shipment');
+            const trackingEl = safeGetElement('trackingNum');
+            if (trackingEl) trackingEl.disabled = false;
             
             // Clear all text inputs
             document.querySelectorAll('input[type="text"]').forEach(el => el.value = '');
             
             // Reset selects
-            document.getElementById('status').value = 'transit';
-            document.getElementById('serviceType').value = 'EXPRESS DELIVERY';
-            document.getElementById('originCountry').value = 'USA';
-            document.getElementById('destinationCountry').value = 'MALAYSIA';
+            const statusEl = safeGetElement('status');
+            if (statusEl) statusEl.value = 'transit';
+            const serviceEl = safeGetElement('serviceType');
+            if (serviceEl) serviceEl.value = 'EXPRESS DELIVERY';
+            const originEl = safeGetElement('originCountry');
+            if (originEl) originEl.value = 'USA';
+            const destEl = safeGetElement('destinationCountry');
+            if (destEl) destEl.value = 'MALAYSIA';
             
             // Reset dates
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('shipDate').value = now.toISOString().slice(0, 16);
+            const shipDateEl = safeGetElement('shipDate');
+            if (shipDateEl) shipDateEl.value = now.toISOString().slice(0, 16);
             
             const tomorrow = new Date(now);
             tomorrow.setDate(tomorrow.getDate() + 2);
-            document.getElementById('estDelivery').value = tomorrow.toISOString().slice(0, 16);
+            const estDeliveryEl = safeGetElement('estDelivery');
+            if (estDeliveryEl) estDeliveryEl.value = tomorrow.toISOString().slice(0, 16);
             
             // Reset timeline
             timelineEvents = [];
@@ -1447,13 +1495,17 @@
             
             // Reset filter
             document.querySelectorAll('.quick-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector('.quick-btn').classList.add('active');
+            const firstBtn = document.querySelector('.quick-btn');
+            if (firstBtn) firstBtn.classList.add('active');
             currentFilter = 'all';
             renderShipmentsList();
             
             // Clear debug
-            document.getElementById('debugInfo').style.display = 'none';
-            document.getElementById('debugInfo').innerHTML = '';
+            const debugDiv = safeGetElement('debugInfo');
+            if (debugDiv) {
+                debugDiv.style.display = 'none';
+                debugDiv.innerHTML = '';
+            }
         }
 
         // ==========================================
@@ -1473,17 +1525,34 @@
         }
 
         // ==========================================
-        // TOAST NOTIFICATION
+        // FIXED TOAST NOTIFICATION
         // ==========================================
         function showToast(title, message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.className = 'toast' + (type === 'error' ? ' error' : '');
-            toast.querySelector('.toast-icon').textContent = type === 'error' ? '✗' : '✓';
-            toast.querySelector('h4').textContent = title;
-            document.getElementById('toastMessage').textContent = message;
+            console.log(`Toast: ${title} - ${message} (${type})`);
             
+            const toast = safeGetElement('toast-notification');
+            const iconBox = toast ? toast.querySelector('.toast-icon-box') : null;
+            const titleEl = safeGetElement('toast-title');
+            const messageEl = safeGetElement('toast-message');
+            
+            if (!toast || !iconBox || !titleEl || !messageEl) {
+                console.error("Toast elements not found!");
+                alert(`${title}: ${message}`); // Fallback
+                return;
+            }
+            
+            // Set type styling
+            toast.className = type === 'error' ? 'error' : '';
+            iconBox.textContent = type === 'error' ? '✗' : '✓';
+            
+            // Set content
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            
+            // Show
             toast.style.display = 'flex';
             
+            // Auto hide
             setTimeout(() => {
                 toast.style.display = 'none';
             }, 4000);
