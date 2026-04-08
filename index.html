@@ -3,139 +3,957 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FASTLINE LOGISTICS | Consignment Tracking</title>
+    <title>Fastline Logistics | Live Shipment Tracking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-         { font-family: Arial, sans-serif; background: #f3f4f6; color: #1f2937; line-height: 1.6; }
-        .header { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 1rem 0; }
-        .header-content { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .logo { display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 700; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-        .search-section { background: white; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .search-title { font-size: 1.875rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .search-box { display: flex; gap: 1rem; max-width: 600px; margin-top: 1rem; }
-        .search-input { flex: 1; padding: 0.875rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
-        .search-btn { background: #1e40af; color: white; border: none; padding: 0.875rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .search-btn:hover { background: #1e3a8a; }
-        .tracking-result { display: none; margin-top: 2rem; }
-        .status-banner { background: #059669; color: white; padding: 1.5rem 2rem; border-radius: 12px; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .status-banner.transit { background: #d97706; }
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
-        .info-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #3b82f6; }
-        .card-header { font-weight: 700; font-size: 1.125rem; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb; }
-        .info-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6; }
-        .info-label { color: #6b7280; font-size: 0.875rem; }
-        .info-value { font-weight: 600; text-align: right; }
-        .loading { display: none; text-align: center; padding: 2rem; color: #6b7280; }
-        .footer { background: #111827; color: white; padding: 2rem 0; margin-top: 3rem; text-align: center; }
+        
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --dark: #111827;
+            --light: #f3f4f6;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .floating-plane {
+            position: absolute;
+            font-size: 2rem;
+            animation: fly 20s linear infinite;
+            opacity: 0.1;
+            filter: grayscale(100%);
+        }
+        
+        @keyframes fly {
+            0% { transform: translateX(-100px) translateY(100px) rotate(15deg); }
+            100% { transform: translateX(calc(100vw + 100px)) translateY(-50px) rotate(15deg); }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            padding: 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .header-top {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 8px 0;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+        
+        .header-main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Glowing Logo */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+        
+        .logo-glow {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-glow::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%);
+            animation: pulse-glow 2s ease-in-out infinite;
+            border-radius: 50%;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(30,64,175,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        
+        .logo-subtitle {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Moving Truck Animation in Header */
+        .truck-animation {
+            position: absolute;
+            right: 100px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            animation: drive 8s linear infinite;
+            opacity: 0.6;
+        }
+        
+        @keyframes drive {
+            0% { transform: translateX(0) translateY(-50%) scaleX(1); }
+            45% { transform: translateX(300px) translateY(-50%) scaleX(1); }
+            50% { transform: translateX(300px) translateY(-50%) scaleX(-1); }
+            95% { transform: translateX(0) translateY(-50%) scaleX(-1); }
+            100% { transform: translateX(0) translateY(-50%) scaleX(1); }
+        }
+
+        /* Navigation */
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-menu a {
+            text-decoration: none;
+            color: #4b5563;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            position: relative;
+            transition: color 0.3s;
+            padding: 8px 0;
+        }
+        
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            transition: width 0.3s;
+        }
+        
+        .nav-menu a:hover {
+            color: var(--primary);
+        }
+        
+        .nav-menu a:hover::after {
+            width: 100%;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 140px;
+            padding: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Search Section */
+        .search-section {
+            max-width: 800px;
+            margin: 0 auto 50px;
+            text-align: center;
+        }
+        
+        .search-title {
+            color: white;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: slideDown 0.8s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .search-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.25rem;
+            margin-bottom: 30px;
+        }
+
+        /* Search Box */
+        .search-container {
+            background: white;
+            border-radius: 20px;
+            padding: 8px;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.8s ease-out 0.2s both;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .search-input {
+            flex: 1;
+            border: none;
+            padding: 18px 25px;
+            font-size: 1.125rem;
+            border-radius: 12px;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .search-input::placeholder {
+            color: #9ca3af;
+        }
+        
+        .search-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(30,64,175,0.3);
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30,64,175,0.4);
+        }
+
+        /* Loading Animation */
+        .loading-container {
+            display: none;
+            text-align: center;
+            padding: 60px;
+            color: white;
+        }
+        
+        .plane-loader {
+            font-size: 4rem;
+            animation: fly-plane 2s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        @keyframes fly-plane {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        /* Results Container */
+        .results-container {
+            display: none;
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Status Card */
+        .status-card {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .status-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background: var(--success);
+        }
+        
+        .status-card.transit::before { background: var(--accent); }
+        .status-card.exception::before { background: #ef4444; }
+        
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+        
+        .status-icon-large {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            animation: bounce 2s infinite;
+        }
+        
+        .status-card.transit .status-icon-large {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .status-text h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .status-text p {
+            color: #6b7280;
+            font-size: 1.125rem;
+        }
+        
+        .tracking-display {
+            text-align: right;
+        }
+        
+        .tracking-label {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        .tracking-number {
+            font-family: 'Courier New', monospace;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+            background: var(--light);
+            padding: 12px 24px;
+            border-radius: 12px;
+        }
+
+        /* Map Section */
+        .map-section {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .live-badge {
+            background: #ef4444;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: pulse-red 2s infinite;
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        #map {
+            height: 500px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Animated Route Line */
+        .route-animation {
+            position: relative;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+        
+        .route-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+            position: relative;
+            animation: route-flow 3s linear infinite;
+        }
+        
+        @keyframes route-flow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+        
+        .moving-truck-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            animation: move-truck 5s linear infinite;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        
+        @keyframes move-truck {
+            0% { left: 0; }
+            100% { left: calc(100% - 30px); }
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header-custom {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f3f4f6;
+        }
+        
+        .card-icon-custom {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .sender-icon { background: #dbeafe; }
+        .receiver-icon { background: #d1fae5; }
+        .shipment-icon { background: #fef3c7; }
+        
+        .card-title-custom {
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: var(--dark);
+        }
+        
+        .info-row-custom {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .info-row-custom:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label-custom {
+            color: #6b7280;
+            font-size: 0.9375rem;
+        }
+        
+        .info-value-custom {
+            font-weight: 600;
+            color: var(--dark);
+            text-align: right;
+            max-width: 60%;
+        }
+
+        /* Timeline */
+        .timeline-section-custom {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .timeline-custom {
+            position: relative;
+            padding-left: 40px;
+        }
+        
+        .timeline-custom::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary), var(--accent));
+        }
+        
+        .timeline-item-custom {
+            position: relative;
+            padding-bottom: 30px;
+        }
+        
+        .timeline-item-custom:last-child {
+            padding-bottom: 0;
+        }
+        
+        .timeline-dot-custom {
+            position: absolute;
+            left: -40px;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .dot-completed { background: var(--success); color: white; }
+        .dot-current { 
+            background: var(--accent); 
+            color: white;
+            animation: pulse-ring 2s infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(245,158,11,0); }
+            100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+        }
+        
+        .dot-pending { background: #e5e7eb; color: #9ca3af; }
+        
+        .timeline-content-custom {
+            background: #f9fafb;
+            border-radius: 16px;
+            padding: 20px;
+            margin-left: 10px;
+        }
+        
+        .timeline-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .timeline-title-custom {
+            font-weight: 700;
+            font-size: 1.0625rem;
+            color: var(--dark);
+        }
+        
+        .timeline-date-custom {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .timeline-location-custom {
+            color: #4b5563;
+            font-size: 0.9375rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Flying Plane Animation on Map */
+        .plane-marker {
+            font-size: 2rem;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            animation: plane-bob 2s ease-in-out infinite;
+            z-index: 1000 !important;
+        }
+        
+        @keyframes plane-bob {
+            0%, 100% { transform: translateY(0) rotate(-45deg); }
+            50% { transform: translateY(-10px) rotate(-45deg); }
+        }
+
+        /* Footer */
+        .footer-custom {
+            background: rgba(17,24,39,0.9);
+            color: white;
+            padding: 40px;
+            margin-top: 60px;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .footer-logo-custom {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .search-title { font-size: 2rem; }
+            .search-container { flex-direction: column; }
+            .status-card { flex-direction: column; text-align: center; gap: 20px; }
+            .info-grid { grid-template-columns: 1fr; }
+            #map { height: 300px; }
+            .truck-animation { display: none; }
+        }
     </style>
-    <div style="display:flex; align-items:center; gap:10px;">
-    <div style="
-        width:40px;
-        height:40px;
-        background:#3b82f6;
-        border-radius:8px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-weight:bold;
-        font-size:18px;
-    ">
-        FL
-    </div>
-    <span style="
-        font-size:1.4rem;
-        font-weight:800;
-        letter-spacing:1px;
-    ">
-        FASTLINE LOGISTICS
-    </span>
-</div>
 </head>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(rgba(10,20,40,0.85), rgba(10,20,40,0.85)),
-                url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1600');
-    background-size: cover;
-    background-position: center;
-    color: #ffffff;
-}
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <div class="floating-plane" style="top: 10%; animation-delay: 0s;">✈️</div>
+        <div class="floating-plane" style="top: 30%; animation-delay: 5s;">✈️</div>
+        <div class="floating-plane" style="top: 60%; animation-delay: 10s;">✈️</div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-top">
+            🌍 Worldwide Express Delivery | 📞 24/7 Customer Support | ✈️ Air Freight Specialists
+        </div>
+        <div class="header-main">
+            <div class="logo-container">
+                <div class="logo-glow">
+                    <div class="logo-icon">🚛</div>
+                </div>
+                <div class="logo-text">
+                    <div class="logo-title">FASTLINE</div>
+                    <div class="logo-subtitle">Logistics & Express</div>
+                </div>
+            </div>
+            
+            <!-- Moving Truck in Header -->
+            <div class="truck-animation">🚚💨</div>
+            
+            <ul class="nav-menu">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Track</a></li>
+                <li><a href="#">Services</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
         </div>
     </header>
-<div class="map-section" style="margin-top:20px;">
-    <h3 style="color:white;">🗺️ Live Shipment Location</h3>
-    <div id="map" style="height:300px; border-radius:10px;"></div>
-</div>
-    <div class="container">
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Search Section -->
         <section class="search-section">
-            <h1 class="search-title">Track Your Consignment</h1>
-            <p>Enter your tracking number to get real-time updates on your shipment</p>
-            <div class="search-box">
-                <input type="text" class="search-input" id="trackingInput" placeholder="Enter tracking number">
-                <button class="search-btn" onclick="trackShipment()">Track Now</button>
+            <h1 class="search-title">Track Your Shipment</h1>
+            <p class="search-subtitle">Enter your tracking number for real-time location updates</p>
+            
+            <div class="search-container">
+                <input type="text" class="search-input" id="trackingInput" placeholder="e.g., FL-5326530558">
+                <button class="search-btn" onclick="trackShipment()">
+                    <span>Track Now</span>
+                    <span>→</span>
+                </button>
             </div>
-            <div class="loading" id="loading">Searching...</div>
         </section>
 
-        <div class="tracking-result" id="trackingResult">
-            <div class="status-banner" id="statusBanner">
-                <div>
-                    <h2 id="statusTitle">-</h2>
-                    <p id="statusDesc">-</p>
+        <!-- Loading Animation -->
+        <div class="loading-container" id="loading">
+            <div class="plane-loader">✈️</div>
+            <p style="font-size: 1.25rem; margin-top: 20px;">Locating your shipment...</p>
+            <p style="opacity: 0.8;">Connecting to satellite tracking system</p>
+        </div>
+
+        <!-- Results -->
+        <div class="results-container" id="results">
+            <!-- Status Card -->
+            <div class="status-card" id="statusCard">
+                <div class="status-info">
+                    <div class="status-icon-large" id="statusIconLarge">📦</div>
+                    <div class="status-text">
+                        <h2 id="statusTitle">In Transit</h2>
+                        <p id="statusDesc">Your shipment is on its way to the destination</p>
+                    </div>
                 </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 0.75rem; opacity: 0.8;">Tracking Number</div>
-                    <div style="font-size: 1.25rem; font-weight: 700;" id="displayTrackingNumber">-</div>
+                <div class="tracking-display">
+                    <div class="tracking-label">Tracking Number</div>
+                    <div class="tracking-number" id="trackingNumberDisplay">-</div>
                 </div>
             </div>
 
+            <!-- Map Section -->
+            <div class="map-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <span>🗺️</span>
+                        <span>Live Location Tracking</span>
+                    </h3>
+                    <div class="live-badge">
+                        <span class="live-dot"></span>
+                        <span>LIVE</span>
+                    </div>
+                </div>
+                
+                <!-- Animated Route -->
+                <div class="route-animation" id="routeAnimation" style="display: none;">
+                    <div class="route-progress" style="width: 65%;"></div>
+                    <div class="moving-truck-icon">🚚</div>
+                </div>
+                
+                <div id="map"></div>
+                
+                <div style="display: flex; justify-content: space-between; margin-top: 15px; padding: 15px; background: #f9fafb; border-radius: 12px;">
+                    <div>
+                        <div style="font-size: 0.875rem; color: #6b7280;">Origin</div>
+                        <div style="font-weight: 700; color: var(--dark);" id="mapOrigin">-</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.875rem; color: #6b7280;">Distance</div>
+                        <div style="font-weight: 700; color: var(--primary);" id="mapDistance">-</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.875rem; color: #6b7280;">Destination</div>
+                        <div style="font-weight: 700; color: var(--dark);" id="mapDestination">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Grid -->
             <div class="info-grid">
+                <!-- Sender -->
                 <div class="info-card">
-                    <div class="card-header">📤 Sender Information</div>
-                    <div class="info-row"><span class="info-label">Name</span><span class="info-value" id="senderName">-</span></div>
-                    <div class="info-row"><span class="info-label">Address</span><span class="info-value" id="senderAddress">-</span></div>
-                    <div class="info-row"><span class="info-label">Phone</span><span class="info-value" id="senderPhone">-</span></div>
+                    <div class="card-header-custom">
+                        <div class="card-icon-custom sender-icon">📤</div>
+                        <div class="card-title-custom">Sender Information</div>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Name</span>
+                        <span class="info-value-custom" id="senderName">-</span>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Reference</span>
+                        <span class="info-value-custom" id="senderRef">-</span>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Address</span>
+                        <span class="info-value-custom" id="senderAddress">-</span>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Country</span>
+                        <span class="info-value-custom" id="senderCountry">-</span>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Phone</span>
+                        <span class="info-value-custom" id="senderPhone">-</span>
+                    </div>
                 </div>
 
+                <!-- Receiver -->
                 <div class="info-card">
-                    <div class="card-header">📥 Receiver Information</div>
-                    <div class="info-row"><span class="info-label">Name</span><span class="info-value" id="receiverName">-</span></div>
-                    <div class="info-row"><span class="info-label">Address</span><span class="info-value" id="receiverAddress">-</span></div>
-                    <div class="info-row"><span class="info-label">Phone</span><span class="info-value" id="receiverPhone">-</span></div>
+                    <div class="card-header-custom">
+                        <div class="card-icon-custom receiver-icon">📥</div>
+                        <div class="card-title-custom">Receiver Information</div>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Name</span>
+                        <span class="info-value-custom" id="receiverName">-</span>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Address</span>
+                        <span class="info-value-custom" id="receiverAddress">-</span>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Country</span>
+                        <span class="info-value-custom" id="receiverCountry">-</span>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Post Code</span>
+                        <span class="info-value-custom" id="receiverPostcode">-</span>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Phone</span>
+                        <span class="info-value-custom" id="receiverPhone">-</span>
+                    </div>
                 </div>
 
+                <!-- Shipment Details -->
                 <div class="info-card">
-                    <div class="card-header">📦 Shipment Details</div>
-                    <div class="info-row"><span class="info-label">Status</span><span class="info-value" id="shipmentStatus">-</span></div>
-                    <div class="info-row"><span class="info-label">Service</span><span class="info-value" id="serviceType">-</span></div>
-                    <div class="info-row"><span class="info-label">Weight</span><span class="info-value" id="weight">-</span></div>
+                    <div class="card-header-custom">
+                        <div class="card-icon-custom shipment-icon">📦</div>
+                        <div class="card-title-custom">Shipment Details</div>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Service Type</span>
+                        <span class="info-value-custom" id="serviceType">-</span>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Weight</span>
+                        <span class="info-value-custom" id="weight">-</span>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Pieces</span>
+                        <span class="info-value-custom" id="pieces">-</span>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">Route No.</span>
+                        <span class="info-value-custom" id="route">-</span>
+                    </div>
+                    <div class="info-row-custom">
+                        <span class="info-label-custom">X-Ray Result</span>
+                        <span class="info-value-custom" id="xray">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="timeline-section-custom">
+                <h3 class="section-title">
+                    <span>🚚</span>
+                    <span>Shipment Journey</span>
+                </h3>
+                <div class="timeline-custom" id="timeline">
+                    <!-- Timeline items inserted here -->
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <footer class="footer">
-        <p>© 2010 Fastline Logistics. All rights reserved.</p>
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="footer-logo-custom">FASTLINE LOGISTICS</div>
+        <p>© 2026 Fastline Logistics. Professional courier services worldwide.</p>
+        <p style="margin-top: 10px; opacity: 0.8;">Air Freight | Sea Freight | Road Freight | Warehousing</p>
     </footer>
 
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
     <script>
-        function loadMap(lat = 33.4484, lng = -112.0740) {
-    const map = L.map('map').setView([lat, lng], 6);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    L.marker([lat, lng]).addTo(map)
-        .bindPopup("Shipment Location")
-        .openPopup();
-}
-        // Initialize Firebase
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",
             authDomain: "fastline-logistics.firebaseapp.com",
@@ -144,8 +962,23 @@ body {
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Track shipment function
-        async function trackShipment(loadMap(33.4484, -112.0740);) {
+        // City coordinates for map
+        const cityCoords = {
+            'NEW YORK': [40.7128, -74.0060],
+            'HOUSTON': [29.7604, -95.3698],
+            'LOS ANGELES': [34.0522, -118.2437],
+            'CHICAGO': [41.8781, -87.6298],
+            'MIAMI': [25.7617, -80.1918],
+            'MALAYSIA': [4.2105, 101.9758],
+            'SINGAPORE': [1.3521, 103.8198],
+            'THAILAND': [15.8700, 100.9925],
+            'USA': [39.8283, -98.5795]
+        };
+
+        let map;
+        let routeLine;
+
+        async function trackShipment() {
             const trackingNum = document.getElementById('trackingInput').value.trim().toUpperCase();
             
             if (!trackingNum) {
@@ -153,8 +986,9 @@ body {
                 return;
             }
 
+            // Show loading
             document.getElementById('loading').style.display = 'block';
-            document.getElementById('trackingResult').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
 
             try {
                 const doc = await db.collection("shipments").doc(trackingNum).get();
@@ -162,35 +996,7 @@ body {
 
                 if (doc.exists) {
                     const data = doc.data();
-                    
-                    // Update status banner
-                    const status = data.status || 'transit';
-                    document.getElementById('statusBanner').className = 'status-banner ' + status;
-                    document.getElementById('statusTitle').textContent = data.statusTitle || status;
-                    document.getElementById('statusDesc').textContent = data.statusDesc || 'Your shipment is being processed';
-                    document.getElementById('displayTrackingNumber').textContent = trackingNum;
-
-                    // Update sender
-                    if (data.sender) {
-                        document.getElementById('senderName').textContent = data.sender.name || '-';
-                        document.getElementById('senderAddress').textContent = data.sender.address || '-';
-                        document.getElementById('senderPhone').textContent = data.sender.phone || '-';
-                    }
-
-                    // Update receiver
-                    if (data.receiver) {
-                        document.getElementById('receiverName').textContent = data.receiver.name || '-';
-                        document.getElementById('receiverAddress').textContent = data.receiver.address || '-';
-                        document.getElementById('receiverPhone').textContent = data.receiver.phone || '-';
-                    }
-
-                    // Update shipment
-                    document.getElementById('shipmentStatus').textContent = status;
-                    document.getElementById('serviceType').textContent = data.shipment?.serviceType || '-';
-                    document.getElementById('weight').textContent = data.shipment?.weight || '-';
-
-                    // Show result
-                    document.getElementById('trackingResult').style.display = 'block';
+                    displayResults(data, trackingNum);
                 } else {
                     alert("Tracking number not found");
                 }
@@ -201,10 +1007,205 @@ body {
             }
         }
 
+        function displayResults(data, trackingNum) {
+            const status = data.status || 'transit';
+            
+            // Update status card
+            const statusCard = document.getElementById('statusCard');
+            statusCard.className = 'status-card ' + status;
+            
+            const icons = { 
+                delivered: '✅', 
+                transit: '🚚', 
+                exception: '⚠️', 
+                pending: '⏳' 
+            };
+            document.getElementById('statusIconLarge').textContent = icons[status] || '📦';
+            document.getElementById('statusTitle').textContent = data.statusTitle || status;
+            document.getElementById('statusDesc').textContent = data.statusDesc || 'Your shipment is being processed';
+            document.getElementById('trackingNumberDisplay').textContent = trackingNum;
+
+            // Update info fields
+            if (data.sender) {
+                document.getElementById('senderName').textContent = data.sender.name || '-';
+                document.getElementById('senderRef').textContent = data.sender.reference || '-';
+                document.getElementById('senderAddress').textContent = data.sender.address || '-';
+                document.getElementById('senderCountry').textContent = data.sender.country || '-';
+                document.getElementById('senderPhone').textContent = data.sender.phone || '-';
+            }
+
+            if (data.receiver) {
+                document.getElementById('receiverName').textContent = data.receiver.name || '-';
+                document.getElementById('receiverAddress').textContent = data.receiver.address || '-';
+                document.getElementById('receiverCountry').textContent = data.receiver.country || '-';
+                document.getElementById('receiverPostcode').textContent = data.receiver.postcode || '-';
+                document.getElementById('receiverPhone').textContent = data.receiver.phone || '-';
+            }
+
+            if (data.shipment) {
+                document.getElementById('serviceType').textContent = data.shipment.serviceType || '-';
+                document.getElementById('weight').textContent = data.shipment.weight || '-';
+                document.getElementById('pieces').textContent = data.shipment.pieces || '-';
+                document.getElementById('route').textContent = data.shipment.route || '-';
+                document.getElementById('xray').textContent = data.shipment.xrayResult || '-';
+            }
+
+            // Show route animation for transit
+            if (status === 'transit') {
+                document.getElementById('routeAnimation').style.display = 'block';
+            } else {
+                document.getElementById('routeAnimation').style.display = 'none';
+            }
+
+            // Initialize map
+            initMap(data);
+
+            // Timeline
+            const timeline = data.timeline || [];
+            const timelineContainer = document.getElementById('timeline');
+            
+            if (timeline.length === 0) {
+                timelineContainer.innerHTML = '<p style="text-align: center; color: #6b7280;">No tracking events available yet.</p>';
+            } else {
+                timelineContainer.innerHTML = timeline.map((event, index) => {
+                    const isFirst = index === 0;
+                    const statusClass = event.status === 'completed' ? 'dot-completed' : 
+                                       event.status === 'current' ? 'dot-current' : 'dot-pending';
+                    const icon = event.status === 'completed' ? '✓' : 
+                                event.status === 'current' ? '●' : '○';
+                    
+                    return `
+                        <div class="timeline-item-custom">
+                            <div class="timeline-dot-custom ${statusClass}">${icon}</div>
+                            <div class="timeline-content-custom">
+                                <div class="timeline-header-custom">
+                                    <div class="timeline-title-custom">${event.title}</div>
+                                    <div class="timeline-date-custom">${event.date}</div>
+                                </div>
+                                <div class="timeline-location-custom">📍 ${event.location}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Show results
+            document.getElementById('results').style.display = 'block';
+            
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function initMap(data) {
+            const origin = data.sender?.address?.toUpperCase() || 'NEW YORK';
+            const dest = data.receiver?.address?.toUpperCase() || 'MALAYSIA';
+            
+            // Find coordinates
+            let originCoords = cityCoords['NEW YORK'];
+            let destCoords = cityCoords['MALAYSIA'];
+            
+            // Try to match city from address
+            for (let city in cityCoords) {
+                if (origin.includes(city)) originCoords = cityCoords[city];
+                if (dest.includes(city)) destCoords = cityCoords[city];
+            }
+
+            // Update map labels
+            document.getElementById('mapOrigin').textContent = data.sender?.country || 'USA';
+            document.getElementById('mapDestination').textContent = data.receiver?.country || 'MALAYSIA';
+            document.getElementById('mapDistance').textContent = calculateDistance(originCoords, destCoords) + ' km';
+
+            // Create map
+            if (map) map.remove();
+            
+            map = L.map('map').setView([(originCoords[0] + destCoords[0])/2, (originCoords[1] + destCoords[1])/2], 4);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            // Custom icons
+            const planeIcon = L.divIcon({
+                html: '<div class="plane-marker">✈️</div>',
+                className: 'plane-div-icon',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            });
+
+            const truckIcon = L.divIcon({
+                html: '<div style="font-size: 2rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🚚</div>',
+                className: 'truck-div-icon',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            });
+
+            // Add markers
+            const originMarker = L.marker(originCoords, {icon: truckIcon}).addTo(map)
+                .bindPopup('<b>Origin:</b> ' + (data.sender?.address || 'Unknown'));
+            
+            const destMarker = L.marker(destCoords, {icon: planeIcon}).addTo(map)
+                .bindPopup('<b>Destination:</b> ' + (data.receiver?.address || 'Unknown'));
+
+            // Draw route line with animation
+            routeLine = L.polyline([originCoords, destCoords], {
+                color: '#3b82f6',
+                weight: 4,
+                opacity: 0.8,
+                dashArray: '10, 10',
+                lineCap: 'round'
+            }).addTo(map);
+
+            // Animate the line
+            let offset = 0;
+            setInterval(() => {
+                offset -= 1;
+                routeLine.setStyle({dashOffset: offset});
+            }, 50);
+
+            // Fit bounds
+            map.fitBounds([originCoords, destCoords], {padding: [50, 50]});
+
+            // Add moving plane along route for transit shipments
+            if (data.status === 'transit') {
+                animatePlane(originCoords, destCoords);
+            }
+        }
+
+        function animatePlane(start, end) {
+            const plane = L.marker(start, {
+                icon: L.divIcon({
+                    html: '<div class="plane-marker">✈️</div>',
+                    className: 'plane-div-icon',
+                    iconSize: [40, 40]
+                })
+            }).addTo(map);
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 0.005;
+                if (progress >= 1) progress = 0;
+                
+                const lat = start[0] + (end[0] - start[0]) * progress;
+                const lng = start[1] + (end[1] - start[1]) * progress;
+                plane.setLatLng([lat, lng]);
+            }, 50);
+        }
+
+        function calculateDistance(coord1, coord2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (coord2[0] - coord1[0]) * Math.PI / 180;
+            const dLon = (coord2[1] - coord1[1]) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(coord1[0] * Math.PI / 180) * Math.cos(coord2[0] * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return Math.round(R * c);
+        }
+
         // Enter key support
         document.getElementById('trackingInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') trackShipment();
         });
     </script>
-</>
+</body>
 </html>
