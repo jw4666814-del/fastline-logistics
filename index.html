@@ -6,35 +6,323 @@
     <title>FASTLINE LOGISTICS | Consignment Tracking</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-       // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",
-  authDomain: "fastline-logistics.firebaseapp.com",
-  projectId: "fastline-logistics",
- firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-</script>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f3f4f6;
-            color: #1f2937;
-            line-height: 1.6;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f3f4f6; color: #1f2937; line-height: 1.6; }
+        .header { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 1rem 0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .header-content { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 700; }
+        .logo-icon { width: 40px; height: 40px; background: white; color: #1e40af; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-links a { color: rgba(255,255,255,0.9); text-decoration: none; font-weight: 500; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .search-section { background: white; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .search-title { font-size: 1.875rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem; }
+        .search-subtitle { color: #6b7280; margin-bottom: 1.5rem; }
+        .search-box { display: flex; gap: 1rem; max-width: 600px; }
+        .search-input { flex: 1; padding: 0.875rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; }
+        .search-btn { background: #1e40af; color: white; border: none; padding: 0.875rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .search-btn:hover { background: #1e3a8a; }
+        .tracking-result { display: none; animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .status-banner { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 1.5rem 2rem; border-radius: 12px; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .status-banner.transit { background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); }
+        .status-banner.exception { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); }
+        .status-left { display: flex; align-items: center; gap: 1rem; }
+        .status-icon { width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+        .info-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #3b82f6; }
+        .info-card.receiver { border-top-color: #10b981; }
+        .info-card.shipment { border-top-color: #f59e0b; }
+        .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb; }
+        .card-icon { width: 40px; height: 40px; background: #eff6ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+        .info-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f3f4f6; }
+        .info-label { color: #6b7280; font-size: 0.875rem; font-weight: 500; }
+        .info-value { color: #111827; font-weight: 600; text-align: right; max-width: 60%; }
+        .details-section, .timeline-section { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .section-title { font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 1rem; }
+        .details-table { width: 100%; border-collapse: collapse; }
+        .details-table th, .details-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        .details-table th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 0.875rem; text-transform: uppercase; }
+        .timeline { position: relative; padding-left: 2rem; }
+        .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #e5e7eb; }
+        .timeline-item { position: relative; padding-bottom: 2rem; padding-left: 1.5rem; }
+        .timeline-dot { position: absolute; left: -2rem; top: 0.25rem; width: 16px; height: 16px; border-radius: 50%; background: #10b981; border: 3px solid white; box-shadow: 0 0 0 3px #10b981; }
+        .timeline-item.pending .timeline-dot { background: #9ca3af; box-shadow: 0 0 0 3px #e5e7eb; }
+        .timeline-item.current .timeline-dot { background: #f59e0b; box-shadow: 0 0 0 3px #fef3c7; }
+        .timeline-content { background: #f9fafb; border-radius: 8px; padding: 1rem; border-left: 4px solid #10b981; }
+        .timeline-item.current .timeline-content { border-left-color: #f59e0b; background: #fffbeb; }
+        .loading { display: none; text-align: center; padding: 3rem; color: #6b7280; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .footer { background: #111827; color: white; padding: 2rem 0; margin-top: 3rem; text-align: center; }
+        .footer-logo { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🚛</div>
+                <span>FASTLINE LOGISTICS</span>
+            </div>
+            <nav class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">Track</a>
+                <a href="#">Services</a>
+                <a href="#">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="search-section">
+            <h1 class="search-title">Track Your Consignment</h1>
+            <p class="search-subtitle">Enter your tracking number to get real-time updates on your shipment</p>
+            <div class="search-box">
+                <input type="text" class="search-input" id="trackingInput" placeholder="Enter tracking number (e.g., FL-5326530558)">
+                <button class="search-btn" onclick="trackShipment()">Track Now</button>
+            </div>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Searching for your consignment...</p>
+            </div>
+        </section>
+
+        <div class="tracking-result" id="trackingResult">
+            <div class="status-banner" id="statusBanner">
+                <div class="status-left">
+                    <div class="status-icon" id="statusIcon">✓</div>
+                    <div class="status-text">
+                        <h2 id="statusTitle">-</h2>
+                        <p id="statusDesc">-</p>
+                    </div>
+                </div>
+                <div class="tracking-number">
+                    <div class="label">Tracking Number</div>
+                    <div class="number" id="displayTrackingNumber">-</div>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card sender">
+                    <div class="card-header">
+                        <div class="card-icon">📤</div>
+                        <div class="card-title">Sender Information</div>
+                    </div>
+                    <div class="info-row"><span class="info-label">Name</span><span class="info-value" id="senderName">-</span></div>
+                    <div class="info-row"><span class="info-label">Reference</span><span class="info-value" id="senderRef">-</span></div>
+                    <div class="info-row"><span class="info-label">Address</span><span class="info-value" id="senderAddress">-</span></div>
+                    <div class="info-row"><span class="info-label">Telephone</span><span class="info-value" id="senderPhone">-</span></div>
+                    <div class="info-row"><span class="info-label">Country</span><span class="info-value" id="senderCountry">-</span></div>
+                </div>
+
+                <div class="info-card receiver">
+                    <div class="card-header">
+                        <div class="card-icon">📥</div>
+                        <div class="card-title">Receiver Information</div>
+                    </div>
+                    <div class="info-row"><span class="info-label">Name</span><span class="info-value" id="receiverName">-</span></div>
+                    <div class="info-row"><span class="info-label">Address</span><span class="info-value" id="receiverAddress">-</span></div>
+                    <div class="info-row"><span class="info-label">Destination</span><span class="info-value" id="receiverDestination">-</span></div>
+                    <div class="info-row"><span class="info-label">Telephone</span><span class="info-value" id="receiverPhone">-</span></div>
+                    <div class="info-row"><span class="info-label">Post Code</span><span class="info-value" id="receiverPostcode">-</span></div>
+                </div>
+
+                <div class="info-card shipment">
+                    <div class="card-header">
+                        <div class="card-icon">📦</div>
+                        <div class="card-title">Shipment Details</div>
+                    </div>
+                    <div class="info-row"><span class="info-label">Service Type</span><span class="info-value" id="serviceType">-</span></div>
+                    <div class="info-row"><span class="info-label">Weight</span><span class="info-value" id="weight">-</span></div>
+                    <div class="info-row"><span class="info-label">Pieces</span><span class="info-value" id="pieces">-</span></div>
+                    <div class="info-row"><span class="info-label">X-Ray Result</span><span class="info-value" id="xray">-</span></div>
+                    <div class="info-row"><span class="info-label">Route</span><span class="info-value" id="route">-</span></div>
+                </div>
+            </div>
+
+            <div class="details-section">
+                <h3 class="section-title">📋 Shipment Facts</h3>
+                <table class="details-table">
+                    <thead><tr><th>Description</th><th>Details</th></tr></thead>
+                    <tbody>
+                        <tr><td>Shipper</td><td id="factShipper">-</td></tr>
+                        <tr><td>Consignee</td><td id="factConsignee">-</td></tr>
+                        <tr><td>Origin</td><td id="factOrigin">-</td></tr>
+                        <tr><td>Destination</td><td id="factDestination">-</td></tr>
+                        <tr><td>Shipment Date</td><td id="factShipDate">-</td></tr>
+                        <tr><td>Estimated Delivery</td><td id="factEstDelivery">-</td></tr>
+                        <tr><td>Service</td><td id="factService">-</td></tr>
+                        <tr><td>Status</td><td id="factStatus">-</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="timeline-section">
+                <h3 class="section-title">🚚 Shipment Progress</h3>
+                <div class="timeline" id="timeline"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">FASTLINE LOGISTICS</div>
+            <p class="footer-text">© 2026 Fastline Logistics. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+        // Your Firebase configuration - ALREADY FILLED IN
+        const firebaseConfig = {
+            apiKey: "AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",
+            authDomain: "fastline-logistics.firebaseapp.com",
+            projectId: "fastline-logistics",
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Main tracking function
+        async function trackShipment() {
+            const trackingNum = document.getElementById('trackingInput').value.trim().toUpperCase();
+            
+            if (!trackingNum) {
+                alert("Please enter a tracking number");
+                return;
+            }
+
+            // Show loading spinner
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('trackingResult').style.display = 'none';
+
+            try {
+                // Fetch from Firebase
+                const doc = await db.collection("shipments").doc(trackingNum).get();
+                
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+
+                if (doc.exists) {
+                    // Show results
+                    displayTracking(doc.data(), trackingNum);
+                } else {
+                    alert("Tracking number not found. Please check and try again.");
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loading').style.display = 'none';
+                alert("Error connecting to database. Please try again later.");
+            }
         }
 
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-            color: white;
-            padding: 1rem 0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        // Display the tracking data on the page
+        function displayTracking(data, trackingNum) {
+            // Update status banner
+            const status = data.status || 'transit';
+            document.getElementById('statusBanner').className = 'status-banner ' + status;
+            document.getElementById('statusTitle').textContent = data.statusTitle || status;
+            document.getElementById('statusDesc').textContent = data.statusDesc || 'Your shipment is being processed';
+            document.getElementById('displayTrackingNumber').textContent = trackingNum;
+
+            // Update status icon
+            const icons = { delivered: '✓', transit: '🚚', exception: '⚠️', pending: '⏳' };
+            document.getElementById('statusIcon').textContent = icons[status] || '⏳';
+
+            // Helper function to safely update text
+            function setText(id, value) {
+                const element = document.getElementById(id);
+                if (element) element.textContent = value || '-';
+            }
+
+            // Update sender info
+            if (data.sender) {
+                setText('senderName', data.sender.name);
+                setText('senderRef', data.sender.reference);
+                setText('senderAddress', data.sender.address);
+                setText('senderPhone', data.sender.phone);
+                setText('senderCountry', data.sender.country);
+            }
+
+            // Update receiver info
+            if (data.receiver) {
+                setText('receiverName', data.receiver.name);
+                setText('receiverAddress', data.receiver.address);
+                setText('receiverDestination', data.receiver.destination);
+                setText('receiverPhone', data.receiver.phone);
+                setText('receiverPostcode', data.receiver.postcode);
+            }
+
+            // Update shipment details
+            if (data.shipment) {
+                setText('serviceType', data.shipment.serviceType);
+                setText('weight', data.shipment.weight);
+                setText('pieces', data.shipment.pieces);
+                setText('xray', data.shipment.xrayResult);
+                setText('route', data.shipment.route);
+            }
+
+            // Update facts table
+            if (data.facts) {
+                setText('factShipper', data.facts.shipper);
+                setText('factConsignee', data.facts.consignee);
+                setText('factOrigin', data.facts.origin);
+                setText('factDestination', data.facts.destination);
+                setText('factShipDate', data.facts.shipDate);
+                setText('factEstDelivery', data.facts.estDelivery);
+                setText('factService', data.facts.service);
+            }
+
+            // Update status color in facts table
+            const statusColors = { 
+                delivered: '#059669', 
+                transit: '#d97706', 
+                exception: '#dc2626',
+                pending: '#6b7280'
+            };
+            const statusCell = document.getElementById('factStatus');
+            if (statusCell) {
+                statusCell.innerHTML = `<strong style="color: ${statusColors[status] || '#6b7280'};">${data.statusTitle || status}</strong>`;
+            }
+
+            // Generate timeline
+            const timelineContainer = document.getElementById('timeline');
+            const timeline = data.timeline || [];
+            
+            if (timeline.length === 0) {
+                timelineContainer.innerHTML = '<p style="color: #6b7280;">No tracking events available yet.</p>';
+            } else {
+                timelineContainer.innerHTML = timeline.map(event => `
+                    <div class="timeline-item ${event.status}">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                                <div style="font-weight:700;">${event.title}</div>
+                                <div style="font-size:0.875rem; color:#6b7280;">${event.date}</div>
+                            </div>
+                            <div style="color:#4b5563; font-size:0.875rem;">📍 ${event.location}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Show the result section
+            document.getElementById('trackingResult').style.display = 'block';
+            
+            // Scroll to results
+            document.getElementById('trackingResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Allow pressing Enter to search
+        document.getElementById('trackingInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') trackShipment();
+        });
+    </script>
+</body>
+</html>            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .header-content {
