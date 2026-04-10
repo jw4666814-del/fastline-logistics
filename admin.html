@@ -1,155 +1,87 @@
-<!-- ======================= TRACKING SITE (index.html) ======================= -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fastline Tracking</title>
+<!-- Firebase SDK (MODERN VERSION) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs } 
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  // 🔥 YOUR CONFIG
+  const firebaseConfig = {
+    apiKey: "AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",
+    authDomain: "fastline-logistics.firebaseapp.com",
+    projectId: "fastline-logistics",
+    storageBucket: "fastline-logistics.firebasestorage.app",
+    messagingSenderId: "690436395427",
+    appId: "1:690436395427:web:c0bde1ab8302d5e74e4a16",
+    measurementId: "G-FQB93GK2T5"
+  };
 
-<style>
-body{margin:0;font-family:Arial;background:#0f172a;color:white;text-align:center}
-.header{background:#dc2626;padding:15px;font-weight:bold}
-input{padding:12px;width:250px;border:none;border-radius:6px}
-button{padding:12px 20px;background:#dc2626;color:white;border:none;border-radius:6px}
-#map{height:300px;margin-top:20px;border-radius:10px}
-#result{display:none;margin-top:20px}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.5)}70%{box-shadow:0 0 0 15px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
-</style>
-</head>
-<body>
+  // INIT
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-<div class="header">🚚 FASTLINE TRACKING</div>
+  // LOGIN FUNCTION
+  window.loginAdmin = function () {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
 
-<h2>Track Shipment</h2>
-<input id="trackingInput" placeholder="Enter tracking number">
-<button onclick="track()">Track</button>
+    signInWithEmailAndPassword(auth, email, password)
+      .then(() => {
+        alert("Login successful 🚀");
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+      })
+      .catch(error => {
+        alert(error.message);
+      });
+  };
 
-<div id="result">
-<h3 id="status"></h3>
-<div id="map"></div>
-</div>
+  // LOGOUT
+  window.logoutAdmin = function () {
+    signOut(auth).then(() => {
+      location.reload();
+    });
+  };
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  // CHECK LOGIN STATE
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+    }
+  });
 
-<script>
-const firebaseConfig={apiKey:"AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",authDomain:"fastline-logistics.firebaseapp.com",projectId:"fastline-logistics"};
-firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
+  // ADD SHIPMENT
+  window.addShipment = async function () {
+    const tracking = "FL-" + Math.floor(Math.random() * 1000000000);
 
-let map,marker;
+    await addDoc(collection(db, "shipments"), {
+      tracking,
+      status: "In Transit",
+      createdAt: new Date()
+    });
 
-function track(){
-let num=document.getElementById("trackingInput").value;
+    alert("Shipment Created: " + tracking);
+    loadShipments();
+  };
 
-db.collection("shipments").doc(num).onSnapshot(doc=>{
- if(doc.exists){
-  let d=doc.data();
-  document.getElementById("result").style.display="block";
-  document.getElementById("status").innerText=d.status;
-  loadMap(d.lat,d.lng);
- }else{alert("Not found")}
-});
-}
+  // LOAD SHIPMENTS
+  async function loadShipments() {
+    const querySnapshot = await getDocs(collection(db, "shipments"));
+    const list = document.getElementById("shipmentList");
+    list.innerHTML = "";
 
-function loadMap(lat,lng){
- if(!map){
-  map=L.map('map').setView([lat,lng],5);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
- }
- if(marker){map.removeLayer(marker)}
- let icon=L.divIcon({html:`<div style="width:20px;height:20px;background:red;border-radius:50%;animation:pulse 1.5s infinite"></div>`});
- marker=L.marker([lat,lng],{icon}).addTo(map);
-}
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      list.innerHTML += `
+        <div style="padding:10px;border-bottom:1px solid #ccc">
+          📦 ${data.tracking} - ${data.status}
+        </div>
+      `;
+    });
+  }
+
+  window.onload = loadShipments;
 </script>
-
-</body>
-</html>
-
-
-<!-- ======================= ADMIN DASHBOARD (admin.html) ======================= -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin</title>
-
-<style>
-body{margin:0;font-family:Arial;background:#f1f5f9}
-.header{background:#0f172a;color:white;padding:15px}
-.card{background:white;padding:20px;margin:20px;border-radius:10px}
-input,button{padding:10px;width:100%;margin-top:10px}
-button{background:#2563eb;color:white;border:none}
-#dash{display:none}
-</style>
-</head>
-<body>
-
-<div id="login" class="card">
-<h2>Login</h2>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-</div>
-
-<div id="dash">
-<div class="header">Admin Panel</div>
-
-<div class="card">
-<h3>Create Shipment</h3>
-<button onclick="gen()">Generate Tracking</button>
-<input id="id" placeholder="Tracking">
-<input id="status" placeholder="Status">
-<input id="lat" placeholder="Latitude">
-<input id="lng" placeholder="Longitude">
-<button onclick="save()">Save</button>
-</div>
-
-<div class="card">
-<h3>Auto Move</h3>
-<input id="moveId" placeholder="Tracking">
-<button onclick="move()">Start Moving</button>
-</div>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-<script>
-const firebaseConfig={apiKey:"AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",authDomain:"fastline-logistics.firebaseapp.com",projectId:"fastline-logistics"};
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.firestore();
-
-function login(){
-auth.signInWithEmailAndPassword(email.value,pass.value).then(()=>{
- login.style.display="none";
- dash.style.display="block";
-}).catch(()=>alert("error"));
-}
-
-function gen(){
-id.value="FL-"+Math.floor(1000000000+Math.random()*9000000000);
-}
-
-function save(){
-db.collection("shipments").doc(id.value).set({status:status.value,lat:+lat.value,lng:+lng.value});
-alert("saved");
-}
-
-function move(){
-let la=29.7,ln=-95.3;
-setInterval(()=>{
- la+=0.3;ln+=0.3;
- db.collection("shipments").doc(moveId.value).update({lat:la,lng:ln});
-},4000);
-}
-</script>
-
-</body>
-</html>
