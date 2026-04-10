@@ -1,1171 +1,155 @@
+<!-- ======================= TRACKING SITE (index.html) ======================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fastline Logistics | Admin Dashboard</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary: #f59e0b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --dark: #1e293b;
-            --light: #f8fafc;
-            --gray: #64748b;
-            --sidebar-width: 280px;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f1f5f9;
-            color: var(--dark);
-        }
-
-        /* Login Screen */
-        .login-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        .login-box {
-            background: white;
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .login-box .logo {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .login-box h2 {
-            margin-bottom: 2rem;
-            color: var(--dark);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--gray);
-            font-weight: 500;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 1rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* Dashboard Layout */
-        .dashboard {
-            display: none;
-        }
-
-        .dashboard.active {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: var(--dark);
-            color: white;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            transition: transform 0.3s;
-        }
-
-        .sidebar-header {
-            padding: 2rem;
-            border-bottom: 1px solid #334155;
-        }
-
-        .sidebar-header .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: white;
-            text-decoration: none;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 1rem 0;
-        }
-
-        .sidebar-menu li {
-            padding: 0.5rem 1.5rem;
-        }
-
-        .sidebar-menu a {
-            color: #94a3b8;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .sidebar-menu i {
-            width: 20px;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding: 2rem;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .header h1 {
-            font-size: 1.875rem;
-        }
-
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: var(--primary);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .stat-icon.blue { background: #dbeafe; color: var(--primary); }
-        .stat-icon.green { background: #d1fae5; color: var(--success); }
-        .stat-icon.orange { background: #fed7aa; color: var(--warning); }
-        .stat-icon.red { background: #fee2e2; color: var(--danger); }
-
-        .stat-info h3 {
-            font-size: 1.875rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .stat-info p {
-            color: var(--gray);
-            font-size: 0.875rem;
-        }
-
-        /* Content Sections */
-        .content-section {
-            display: none;
-        }
-
-        .content-section.active {
-            display: block;
-        }
-
-        /* Cards */
-        .card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 1.5rem;
-        }
-
-        .card-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-header h2 {
-            font-size: 1.25rem;
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        /* Buttons */
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            width: auto;
-        }
-
-        .btn-success {
-            background: var(--success);
-        }
-
-        .btn-success:hover {
-            background: #059669;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .btn-secondary {
-            background: var(--gray);
-        }
-
-        /* Table */
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        th {
-            background: var(--light);
-            font-weight: 600;
-            color: var(--gray);
-            font-size: 0.875rem;
-            text-transform: uppercase;
-        }
-
-        tr:hover {
-            background: var(--light);
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .status-delivered {
-            background: #d1fae5;
-            color: var(--success);
-        }
-
-        .status-transit {
-            background: #dbeafe;
-            color: var(--primary);
-        }
-
-        .status-pending {
-            background: #fed7aa;
-            color: var(--warning);
-        }
-
-        .status-exception {
-            background: #fee2e2;
-            color: var(--danger);
-        }
-
-        /* Form Styles */
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--dark);
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        /* Search Box */
-        .search-box {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-        }
-
-        /* Mobile Toggle */
-        .mobile-toggle {
-            display: none;
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            z-index: 1001;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.75rem;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .mobile-toggle {
-                display: block;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-<base target="_blank">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fastline Tracking</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+body{margin:0;font-family:Arial;background:#0f172a;color:white;text-align:center}
+.header{background:#dc2626;padding:15px;font-weight:bold}
+input{padding:12px;width:250px;border:none;border-radius:6px}
+button{padding:12px 20px;background:#dc2626;color:white;border:none;border-radius:6px}
+#map{height:300px;margin-top:20px;border-radius:10px}
+#result{display:none;margin-top:20px}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.5)}70%{box-shadow:0 0 0 15px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
+</style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div class="login-screen" id="loginScreen">
-        <div class="login-box">
-            <div class="logo">
-                <i class="fas fa-shipping-fast"></i>
-                Fastline Logistics
-            </div>
-            <h2>Admin Dashboard</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>Username</label>
-                    <input type="text" id="username" placeholder="Enter username" required>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="password" placeholder="Enter password" required>
-                </div>
-                <button type="submit" class="btn">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </button>
-            </form>
-            <p style="margin-top: 1rem; color: var(--gray); font-size: 0.875rem;">
-                Default: admin / admin123
-            </p>
-        </div>
-    </div>
 
-    <!-- Dashboard -->
-    <div class="dashboard" id="dashboard">
-        <button class="mobile-toggle" onclick="toggleSidebar()">
-            <i class="fas fa-bars"></i>
-        </button>
+<div class="header">🚚 FASTLINE TRACKING</div>
 
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <a href="#" class="logo">
-                    <i class="fas fa-shipping-fast"></i>
-                    Fastline Logistics
-                </a>
-            </div>
-            <ul class="sidebar-menu">
-                <li>
-                    <a href="#" class="active" onclick="showSection('overview')">
-                        <i class="fas fa-home"></i>
-                        <span>Overview</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" onclick="showSection('shipments')">
-                        <i class="fas fa-box"></i>
-                        <span>Shipments</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" onclick="showSection('create')">
-                        <i class="fas fa-plus-circle"></i>
-                        <span>Create Shipment</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" onclick="showSection('customers')">
-                        <i class="fas fa-users"></i>
-                        <span>Customers</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" onclick="showSection('tracking')">
-                        <i class="fas fa-search-location"></i>
-                        <span>Track Package</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" onclick="showSection('reports')">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Reports</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" onclick="showSection('settings')">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
-                <li style="margin-top: 2rem;">
-                    <a href="#" onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </a>
-                </li>
-            </ul>
-        </aside>
+<h2>Track Shipment</h2>
+<input id="trackingInput" placeholder="Enter tracking number">
+<button onclick="track()">Track</button>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="header">
-                <h1 id="pageTitle">Dashboard Overview</h1>
-                <div class="user-menu">
-                    <span id="adminName">Admin User</span>
-                    <div class="user-avatar">AD</div>
-                </div>
-            </div>
+<div id="result">
+<h3 id="status"></h3>
+<div id="map"></div>
+</div>
 
-            <!-- Overview Section -->
-            <div class="content-section active" id="overview">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon blue">
-                            <i class="fas fa-box"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="totalShipments">1,284</h3>
-                            <p>Total Shipments</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon green">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>1,092</h3>
-                            <p>Delivered</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon orange">
-                            <i class="fas fa-shipping-fast"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>156</h3>
-                            <p>In Transit</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon red">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>36</h3>
-                            <p>Exceptions</p>
-                        </div>
-                    </div>
-                </div>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Recent Shipments</h2>
-                        <button class="btn btn-sm" onclick="showSection('shipments')">View All</button>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Tracking #</th>
-                                        <th>Sender</th>
-                                        <th>Receiver</th>
-                                        <th>Status</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="recentShipmentsTable">
-                                    <tr>
-                                        <td>FL123456789</td>
-                                        <td>John Smith</td>
-                                        <td>Jane Doe</td>
-                                        <td><span class="status-badge status-transit">In Transit</span></td>
-                                        <td>2024-04-09</td>
-                                    </tr>
-                                    <tr>
-                                        <td>FL987654321</td>
-                                        <td>ABC Corp</td>
-                                        <td>XYZ Ltd</td>
-                                        <td><span class="status-badge status-delivered">Delivered</span></td>
-                                        <td>2024-04-08</td>
-                                    </tr>
-                                    <tr>
-                                        <td>FL555888999</td>
-                                        <td>Mike Johnson</td>
-                                        <td>Sarah Wilson</td>
-                                        <td><span class="status-badge status-pending">Pending</span></td>
-                                        <td>2024-04-09</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<script>
+const firebaseConfig={apiKey:"AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",authDomain:"fastline-logistics.firebaseapp.com",projectId:"fastline-logistics"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
 
-            <!-- Shipments Section -->
-            <div class="content-section" id="shipments">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>All Shipments</h2>
-                        <button class="btn btn-sm btn-success" onclick="showSection('create')">
-                            <i class="fas fa-plus"></i> New Shipment
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="search-box">
-                            <input type="text" id="shipmentSearch" placeholder="Search by tracking number, sender, or receiver...">
-                            <button class="btn btn-sm" onclick="searchShipments()">
-                                <i class="fas fa-search"></i> Search
-                            </button>
-                        </div>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Tracking #</th>
-                                        <th>Sender</th>
-                                        <th>Receiver</th>
-                                        <th>Origin</th>
-                                        <th>Destination</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="allShipmentsTable">
-                                    <!-- Populated by JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+let map,marker;
 
-            <!-- Create Shipment Section -->
-            <div class="content-section" id="create">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Create New Shipment</h2>
-                    </div>
-                    <div class="card-body">
-                        <form id="createShipmentForm">
-                            <h3 style="margin-bottom: 1rem; color: var(--primary);">Sender Information</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Sender Name *</label>
-                                    <input type="text" id="newSenderName" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Reference Number</label>
-                                    <input type="text" id="newSenderRef">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Address *</label>
-                                    <input type="text" id="newSenderAddress" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Post Code *</label>
-                                    <input type="text" id="newSenderPost" required>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Phone *</label>
-                                    <input type="tel" id="newSenderPhone" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Country *</label>
-                                    <input type="text" id="newSenderCountry" required>
-                                </div>
-                            </div>
+function track(){
+let num=document.getElementById("trackingInput").value;
 
-                            <h3 style="margin: 2rem 0 1rem; color: var(--primary);">Receiver Information</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Receiver Name *</label>
-                                    <input type="text" id="newReceiverName" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Phone *</label>
-                                    <input type="tel" id="newReceiverPhone" required>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Address *</label>
-                                    <input type="text" id="newReceiverAddress" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Post Code *</label>
-                                    <input type="text" id="newReceiverPost" required>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Country *</label>
-                                    <input type="text" id="newReceiverCountry" required>
-                                </div>
-                            </div>
+db.collection("shipments").doc(num).onSnapshot(doc=>{
+ if(doc.exists){
+  let d=doc.data();
+  document.getElementById("result").style.display="block";
+  document.getElementById("status").innerText=d.status;
+  loadMap(d.lat,d.lng);
+ }else{alert("Not found")}
+});
+}
 
-                            <h3 style="margin: 2rem 0 1rem; color: var(--primary);">Shipment Details</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Service Type *</label>
-                                    <select id="newServiceType" required>
-                                        <option value="">Select Service</option>
-                                        <option value="Same-Day">Same-Day Delivery</option>
-                                        <option value="Express">Express Overnight</option>
-                                        <option value="Standard">Standard Ground</option>
-                                        <option value="International">International</option>
-                                        <option value="Freight">Freight & Cargo</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Weight (kg) *</label>
-                                    <input type="number" id="newWeight" step="0.1" required>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Number of Pieces *</label>
-                                    <input type="number" id="newPieces" min="1" value="1" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Total Charges ($)</label>
-                                    <input type="number" id="newCharges" step="0.01">
-                                </div>
-                            </div>
+function loadMap(lat,lng){
+ if(!map){
+  map=L.map('map').setView([lat,lng],5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+ }
+ if(marker){map.removeLayer(marker)}
+ let icon=L.divIcon({html:`<div style="width:20px;height:20px;background:red;border-radius:50%;animation:pulse 1.5s infinite"></div>`});
+ marker=L.marker([lat,lng],{icon}).addTo(map);
+}
+</script>
 
-                            <button type="submit" class="btn" style="margin-top: 1rem;">
-                                <i class="fas fa-save"></i> Create Shipment
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
+</body>
+</html>
 
-            <!-- Customers Section -->
-            <div class="content-section" id="customers">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Customer Management</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="search-box">
-                            <input type="text" placeholder="Search customers...">
-                            <button class="btn btn-sm">Search</button>
-                        </div>
-                        <p style="text-align: center; color: var(--gray); padding: 2rem;">
-                            Customer management features coming soon...
-                        </p>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Tracking Section -->
-            <div class="content-section" id="tracking">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Track Package</h2>
-                    </div>
-                    <div class="card-body">
-                        <div class="search-box">
-                            <input type="text" id="adminTrackingInput" placeholder="Enter tracking number...">
-                            <button class="btn btn-sm" onclick="adminTrack()">
-                                <i class="fas fa-search"></i> Track
-                            </button>
-                        </div>
-                        <div id="adminTrackingResult" style="display: none;">
-                            <div class="card" style="margin-top: 1rem;">
-                                <div class="card-header">
-                                    <h3>Tracking Result</h3>
-                                    <span class="status-badge status-transit">In Transit</span>
-                                </div>
-                                <div class="card-body">
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label>Current Location</label>
-                                            <input type="text" value="New York Distribution Center" readonly>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Estimated Delivery</label>
-                                            <input type="text" value="April 12, 2024" readonly>
-                                        </div>
-                                    </div>
-                                    <div class="progress-section" style="margin-top: 1rem;">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" style="width: 60%;"></div>
-                                        </div>
-                                        <div class="progress-steps">
-                                            <div class="progress-step active">
-                                                <i class="fas fa-clipboard-check"></i>
-                                                <p>Booked</p>
-                                            </div>
-                                            <div class="progress-step active">
-                                                <i class="fas fa-box-open"></i>
-                                                <p>Picked Up</p>
-                                            </div>
-                                            <div class="progress-step active">
-                                                <i class="fas fa-warehouse"></i>
-                                                <p>In Transit</p>
-                                            </div>
-                                            <div class="progress-step pending">
-                                                <i class="fas fa-truck"></i>
-                                                <p>Out for Delivery</p>
-                                            </div>
-                                            <div class="progress-step pending">
-                                                <i class="fas fa-check-circle"></i>
-                                                <p>Delivered</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- ======================= ADMIN DASHBOARD (admin.html) ======================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin</title>
 
-            <!-- Reports Section -->
-            <div class="content-section" id="reports">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Reports & Analytics</h2>
-                    </div>
-                    <div class="card-body">
-                        <p style="text-align: center; color: var(--gray); padding: 2rem;">
-                            Advanced reporting features coming soon...
-                        </p>
-                    </div>
-                </div>
-            </div>
+<style>
+body{margin:0;font-family:Arial;background:#f1f5f9}
+.header{background:#0f172a;color:white;padding:15px}
+.card{background:white;padding:20px;margin:20px;border-radius:10px}
+input,button{padding:10px;width:100%;margin-top:10px}
+button{background:#2563eb;color:white;border:none}
+#dash{display:none}
+</style>
+</head>
+<body>
 
-            <!-- Settings Section -->
-            <div class="content-section" id="settings">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>System Settings</h2>
-                    </div>
-                    <div class="card-body">
-                        <form>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Company Name</label>
-                                    <input type="text" value="Fastline Logistics">
-                                </div>
-                                <div class="form-group">
-                                    <label>Contact Email</label>
-                                    <input type="email" value="admin@fastlinelogistics.com">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Phone Number</label>
-                                    <input type="tel" value="+1 (800) FASTLINE">
-                                </div>
-                                <div class="form-group">
-                                    <label>Time Zone</label>
-                                    <select>
-                                        <option>Eastern Time (ET)</option>
-                                        <option>Pacific Time (PT)</option>
-                                        <option>UTC</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-sm" onclick="alert('Settings saved!')">
-                                <i class="fas fa-save"></i> Save Changes
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
+<div id="login" class="card">
+<h2>Login</h2>
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+</div>
 
-    <script>
-        // Sample shipment data
-        let shipments = [
-            {
-                tracking: 'FL123456789',
-                sender: 'John Smith',
-                receiver: 'Jane Doe',
-                origin: 'New York, USA',
-                destination: 'Los Angeles, USA',
-                status: 'In Transit',
-                date: '2024-04-09'
-            },
-            {
-                tracking: 'FL987654321',
-                sender: 'ABC Corp',
-                receiver: 'XYZ Ltd',
-                origin: 'Chicago, USA',
-                destination: 'Miami, USA',
-                status: 'Delivered',
-                date: '2024-04-08'
-            },
-            {
-                tracking: 'FL555888999',
-                sender: 'Mike Johnson',
-                receiver: 'Sarah Wilson',
-                origin: 'Seattle, USA',
-                destination: 'Boston, USA',
-                status: 'Pending',
-                date: '2024-04-09'
-            },
-            {
-                tracking: 'FL111222333',
-                sender: 'Tech Solutions Inc',
-                receiver: 'Global Retail Co',
-                origin: 'Austin, USA',
-                destination: 'Denver, USA',
-                status: 'Exception',
-                date: '2024-04-07'
-            }
-        ];
+<div id="dash">
+<div class="header">Admin Panel</div>
 
-        // Login functionality
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+<div class="card">
+<h3>Create Shipment</h3>
+<button onclick="gen()">Generate Tracking</button>
+<input id="id" placeholder="Tracking">
+<input id="status" placeholder="Status">
+<input id="lat" placeholder="Latitude">
+<input id="lng" placeholder="Longitude">
+<button onclick="save()">Save</button>
+</div>
 
-            // Simple authentication (replace with real auth in production)
-            if (username === 'admin' && password === 'admin123') {
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('dashboard').classList.add('active');
-                document.getElementById('adminName').textContent = username;
-                loadShipments();
-            } else {
-                alert('Invalid credentials! Try admin / admin123');
-            }
-        });
+<div class="card">
+<h3>Auto Move</h3>
+<input id="moveId" placeholder="Tracking">
+<button onclick="move()">Start Moving</button>
+</div>
+</div>
 
-        // Logout
-        function logout() {
-            document.getElementById('dashboard').classList.remove('active');
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('loginForm').reset();
-        }
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-        // Show section
-        function showSection(sectionName) {
-            // Hide all sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.classList.remove('active');
-            });
+<script>
+const firebaseConfig={apiKey:"AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",authDomain:"fastline-logistics.firebaseapp.com",projectId:"fastline-logistics"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+const db=firebase.firestore();
 
-            // Show selected section
-            document.getElementById(sectionName).classList.add('active');
+function login(){
+auth.signInWithEmailAndPassword(email.value,pass.value).then(()=>{
+ login.style.display="none";
+ dash.style.display="block";
+}).catch(()=>alert("error"));
+}
 
-            // Update page title
-            const titles = {
-                'overview': 'Dashboard Overview',
-                'shipments': 'All Shipments',
-                'create': 'Create New Shipment',
-                'customers': 'Customer Management',
-                'tracking': 'Track Package',
-                'reports': 'Reports & Analytics',
-                'settings': 'System Settings'
-            };
-            document.getElementById('pageTitle').textContent = titles[sectionName];
+function gen(){
+id.value="FL-"+Math.floor(1000000000+Math.random()*9000000000);
+}
 
-            // Update sidebar active state
-            document.querySelectorAll('.sidebar-menu a').forEach(link => {
-                link.classList.remove('active');
-            });
-            event.target.closest('a').classList.add('active');
+function save(){
+db.collection("shipments").doc(id.value).set({status:status.value,lat:+lat.value,lng:+lng.value});
+alert("saved");
+}
 
-            // Close mobile sidebar
-            document.getElementById('sidebar').classList.remove('active');
-        }
+function move(){
+let la=29.7,ln=-95.3;
+setInterval(()=>{
+ la+=0.3;ln+=0.3;
+ db.collection("shipments").doc(moveId.value).update({lat:la,lng:ln});
+},4000);
+}
+</script>
 
-        // Toggle sidebar on mobile
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-        }
-
-        // Load shipments table
-        function loadShipments() {
-            const tbody = document.getElementById('allShipmentsTable');
-            tbody.innerHTML = '';
-
-            shipments.forEach(shipment => {
-                const statusClass = getStatusClass(shipment.status);
-                const row = `
-                    <tr>
-                        <td>${shipment.tracking}</td>
-                        <td>${shipment.sender}</td>
-                        <td>${shipment.receiver}</td>
-                        <td>${shipment.origin}</td>
-                        <td>${shipment.destination}</td>
-                        <td><span class="status-badge ${statusClass}">${shipment.status}</span></td>
-                        <td>
-                            <button class="btn btn-sm" onclick="viewShipment('${shipment.tracking}')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteShipment('${shipment.tracking}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
-            });
-        }
-
-        function getStatusClass(status) {
-            switch(status) {
-                case 'Delivered': return 'status-delivered';
-                case 'In Transit': return 'status-transit';
-                case 'Pending': return 'status-pending';
-                case 'Exception': return 'status-exception';
-                default: return 'status-pending';
-            }
-        }
-
-        // Create new shipment
-        document.getElementById('createShipmentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const trackingNum = 'FL' + Math.floor(Math.random() * 1000000000);
-
-            const newShipment = {
-                tracking: trackingNum,
-                sender: document.getElementById('newSenderName').value,
-                receiver: document.getElementById('newReceiverName').value,
-                origin: document.getElementById('newSenderCountry').value,
-                destination: document.getElementById('newReceiverCountry').value,
-                status: 'Pending',
-                date: new Date().toISOString().split('T')[0]
-            };
-
-            shipments.unshift(newShipment);
-
-            alert('Shipment created successfully! Tracking number: ' + trackingNum);
-
-            // Reset form and go to shipments
-            this.reset();
-            showSection('shipments');
-            loadShipments();
-
-            // Update total count
-            const currentTotal = parseInt(document.getElementById('totalShipments').textContent.replace(',', ''));
-            document.getElementById('totalShipments').textContent = (currentTotal + 1).toLocaleString();
-        });
-
-        // View shipment details
-        function viewShipment(tracking) {
-            alert('View details for: ' + tracking);
-        }
-
-        // Delete shipment
-        function deleteShipment(tracking) {
-            if (confirm('Are you sure you want to delete shipment ' + tracking + '?')) {
-                shipments = shipments.filter(s => s.tracking !== tracking);
-                loadShipments();
-            }
-        }
-
-        // Search shipments
-        function searchShipments() {
-            const searchTerm = document.getElementById('shipmentSearch').value.toLowerCase();
-            const filtered = shipments.filter(s => 
-                s.tracking.toLowerCase().includes(searchTerm) ||
-                s.sender.toLowerCase().includes(searchTerm) ||
-                s.receiver.toLowerCase().includes(searchTerm)
-            );
-
-            const tbody = document.getElementById('allShipmentsTable');
-            tbody.innerHTML = '';
-
-            filtered.forEach(shipment => {
-                const statusClass = getStatusClass(shipment.status);
-                const row = `
-                    <tr>
-                        <td>${shipment.tracking}</td>
-                        <td>${shipment.sender}</td>
-                        <td>${shipment.receiver}</td>
-                        <td>${shipment.origin}</td>
-                        <td>${shipment.destination}</td>
-                        <td><span class="status-badge ${statusClass}">${shipment.status}</span></td>
-                        <td>
-                            <button class="btn btn-sm" onclick="viewShipment('${shipment.tracking}')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteShipment('${shipment.tracking}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
-            });
-        }
-
-        // Admin tracking
-        function adminTrack() {
-            const trackingNum = document.getElementById('adminTrackingInput').value;
-            if (trackingNum) {
-                document.getElementById('adminTrackingResult').style.display = 'block';
-            }
-        }
-    </script>
 </body>
 </html>
