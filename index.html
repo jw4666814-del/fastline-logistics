@@ -1,3 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fastline Logistics</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+body { font-family: Inter, sans-serif; margin:0; background:#f9fafb; }
+.navbar { background:#1e40af; color:white; padding:1rem; font-weight:700; }
+.container { max-width:900px; margin:auto; padding:2rem; }
+.tracking-box { background:white; padding:2rem; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+input { padding:1rem; width:70%; border:1px solid #ccc; border-radius:8px;}
+button { padding:1rem; background:#f97316; color:white; border:none; border-radius:8px; cursor:pointer;}
+#liveMap { height:400px; margin-top:20px; border-radius:10px;}
+.status { margin-top:20px; font-weight:700;}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">🚚 Fastline Logistics</div>
+
+<div class="container">
+<div class="tracking-box">
+
+<h2>Track Shipment</h2>
+
+<input id="trackingInput" placeholder="Enter Tracking Number">
+<button onclick="trackShipment()">Track</button>
+
+<div id="loading" style="display:none;">Loading...</div>
+
+<div id="trackingResult" style="display:none;">
+<div class="status" id="statusTitle"></div>
+<div id="liveMap"></div>
+</div>
+
+</div>
+</div>
+
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -6,7 +49,7 @@
 <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_KEY"></script>
 
 <script>
-// 🔐 FIREBASE CONFIG
+// FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",
   authDomain: "fastline-logistics.firebaseapp.com",
@@ -17,20 +60,15 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// MAP VARIABLES
 let map, marker, routeLine;
 let driverIndex = 0;
 let driverRoute = [];
 
-// 🚚 TRACK FROM FIREBASE
+// TRACK
 function trackShipment() {
-    const input = document.getElementById('trackingInput');
-    const trackingNum = input.value.trim().toUpperCase();
+    const trackingNum = document.getElementById('trackingInput').value.trim().toUpperCase();
 
-    if (!trackingNum) {
-        alert('Enter tracking number');
-        return;
-    }
+    if (!trackingNum) return alert("Enter tracking number");
 
     document.getElementById('loading').style.display = 'block';
     document.getElementById('trackingResult').style.display = 'none';
@@ -40,41 +78,25 @@ function trackShipment() {
         document.getElementById('loading').style.display = 'none';
 
         if (!snapshot.exists()) {
-            alert("Tracking number not found");
+            alert("Not found");
             return;
         }
 
         const data = snapshot.val();
-        displayTracking(data, trackingNum);
+        document.getElementById('statusTitle').textContent = data.status;
+
+        document.getElementById('trackingResult').style.display = 'block';
+
+        setTimeout(()=>initMap(data.route),200);
     });
 }
 
-// 🎯 DISPLAY DATA
-function displayTracking(data, trackingNum) {
-
-    document.getElementById('statusTitle').textContent = data.status;
-    document.getElementById('statusDesc').textContent = "Live shipment update";
-    document.getElementById('displayTrackingNumber').textContent = trackingNum;
-
-    document.getElementById('shipmentStatus').textContent = data.status;
-
-    document.getElementById('trackingResult').style.display = 'block';
-
-    setTimeout(() => {
-        initGoogleMap(data.route);
-    }, 200);
-
-    document.getElementById('trackingResult').scrollIntoView({ behavior: 'smooth' });
-}
-
-// 🗺️ GOOGLE MAP + DRIVER SIMULATION
-function initGoogleMap(routeData) {
-
-    const center = routeData[0];
+// MAP
+function initMap(routeData) {
 
     map = new google.maps.Map(document.getElementById("liveMap"), {
-        zoom: 6,
-        center: center
+        zoom: 5,
+        center: routeData[0]
     });
 
     driverRoute = routeData;
@@ -87,29 +109,25 @@ function initGoogleMap(routeData) {
 
     routeLine = new google.maps.Polyline({
         path: routeData,
-        geodesic: true,
         strokeOpacity: 0.8,
         strokeWeight: 4,
         map: map
     });
 
     driverIndex = 0;
-    animateDriver();
+    moveDriver();
 }
 
-// 🚚 DRIVER MOVEMENT
-function animateDriver() {
+// DRIVER
+function moveDriver() {
     if (driverIndex < driverRoute.length) {
         marker.setPosition(driverRoute[driverIndex]);
         map.panTo(driverRoute[driverIndex]);
         driverIndex++;
-
-        setTimeout(animateDriver, 2000);
+        setTimeout(moveDriver, 2000);
     }
 }
-
-// ⌨️ ENTER KEY SUPPORT
-document.getElementById('trackingInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') trackShipment();
-});
 </script>
+
+</body>
+</html>
