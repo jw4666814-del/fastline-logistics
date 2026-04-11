@@ -1,51 +1,117 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Panel</title>
+<title>Fastline Admin Dashboard</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
 <style>
-body { font-family: Arial; background:#111; color:white; text-align:center; }
-.box { background:#222; padding:20px; margin:50px auto; width:400px; border-radius:10px; }
-input { width:90%; padding:10px; margin:5px; }
-button { padding:10px; background:#f97316; border:none; color:white; }
+body { font-family: Arial; background:#0f172a; color:white; }
+.container { max-width:1000px; margin:auto; padding:20px; }
+
+.box {
+ background:#1e293b;
+ padding:20px;
+ border-radius:10px;
+ margin-bottom:20px;
+}
+
+input, textarea {
+ width:100%;
+ padding:10px;
+ margin:5px 0;
+ border:none;
+ border-radius:5px;
+}
+
+button {
+ padding:8px 12px;
+ border:none;
+ border-radius:5px;
+ margin:3px;
+ cursor:pointer;
+}
+
+.add { background:#22c55e; color:white; }
+.edit { background:#f59e0b; }
+.delete { background:#ef4444; color:white; }
+.logout { background:#f97316; color:white; }
+
+table {
+ width:100%;
+ border-collapse: collapse;
+ margin-top:20px;
+}
+
+th, td {
+ padding:10px;
+ border-bottom:1px solid #334155;
+ text-align:left;
+}
+
 </style>
 </head>
 
 <body>
 
+<div class="container">
+
+<!-- LOGIN -->
 <div class="box" id="loginBox">
 <h2>Admin Login</h2>
-<input id="email" placeholder="Email"><br>
-<input id="pass" type="password" placeholder="Password"><br>
+<input id="email" placeholder="Email">
+<input id="pass" type="password" placeholder="Password">
 <button onclick="login()">Login</button>
 </div>
 
-<div class="box" id="adminBox" style="display:none;">
-<h2>Add Shipment</h2>
+<!-- DASHBOARD -->
+<div id="adminBox" style="display:none;">
 
-<input id="trackId" placeholder="Tracking ID"><br>
-<input id="status" placeholder="Status"><br>
-<textarea id="route" placeholder='Route JSON'></textarea><br>
+<div class="box">
+<h2>📦 Add / Edit Shipment</h2>
 
-<button onclick="add()">Save Shipment</button>
-<button onclick="logout()">Logout</button>
+<input id="trackId" placeholder="Tracking ID">
+<input id="status" placeholder="Status">
+<textarea id="route" placeholder='Route JSON'></textarea>
+
+<button class="add" onclick="saveShipment()">Save</button>
+<button class="logout" onclick="logout()">Logout</button>
+</div>
+
+<div class="box">
+<h2>📊 All Shipments</h2>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="tableBody"></tbody>
+</table>
+
+</div>
+
+</div>
 </div>
 
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",
   authDomain: "fastline-logistics.firebaseapp.com",
-  databaseURL: "fastline-logistics.firebasestorage.app",
+  databaseURL: "https://fastline-logistics-default-rtdb.firebaseio.com/",
   projectId: "fastline-logistics"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+/* LOGIN */
 function login(){
  let email=document.getElementById("email").value;
  let pass=document.getElementById("pass").value;
@@ -54,6 +120,7 @@ function login(){
  .then(()=>{
    document.getElementById("loginBox").style.display="none";
    document.getElementById("adminBox").style.display="block";
+   loadShipments();
  });
 }
 
@@ -62,7 +129,8 @@ function logout(){
  location.reload();
 }
 
-function add(){
+/* SAVE (ADD / EDIT) */
+function saveShipment(){
  let id=document.getElementById("trackId").value;
 
  let data={
@@ -72,6 +140,48 @@ function add(){
 
  db.ref("shipments/"+id).set(data);
  alert("Saved!");
+}
+
+/* LOAD TABLE */
+function loadShipments(){
+ db.ref("shipments").on("value", snap=>{
+   let table=document.getElementById("tableBody");
+   table.innerHTML="";
+
+   snap.forEach(child=>{
+     let data=child.val();
+     let id=child.key;
+
+     table.innerHTML+=`
+     <tr>
+       <td>${id}</td>
+       <td>${data.status}</td>
+       <td>
+         <button class="edit" onclick="edit('${id}')">Edit</button>
+         <button class="delete" onclick="del('${id}')">Delete</button>
+       </td>
+     </tr>
+     `;
+   });
+ });
+}
+
+/* EDIT */
+function edit(id){
+ db.ref("shipments/"+id).once("value").then(snap=>{
+   let data=snap.val();
+
+   document.getElementById("trackId").value=id;
+   document.getElementById("status").value=data.status;
+   document.getElementById("route").value=JSON.stringify(data.route, null, 2);
+ });
+}
+
+/* DELETE */
+function del(id){
+ if(confirm("Delete shipment?")){
+   db.ref("shipments/"+id).remove();
+ }
 }
 </script>
 
