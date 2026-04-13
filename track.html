@@ -1,17 +1,14 @@
 
-# Create separate admin portal with images and tracking editing
-admin_portal = '''<!DOCTYPE html>
+# Create customer tracking page
+customer_tracking = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fastline Logistics | Admin Portal</title>
+    <title>Fastline Logistics | Track Your Shipment</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --primary: #FF6B35;
@@ -23,1012 +20,303 @@ admin_portal = '''<!DOCTYPE html>
             --gray: #6C757D;
             --success: #28A745;
             --danger: #DC3545;
-            --warning: #FFC107;
-            --sidebar-width: 280px;
-            --header-height: 70px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: var(--dark); }
-        
-        /* Login Screen */
-        .login-screen {
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(135deg, var(--dark) 0%, var(--secondary) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        .login-box {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 440px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-        .login-header { text-align: center; margin-bottom: 2rem; }
-        .login-logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            color: white;
-            font-size: 2.5rem;
-        }
-        .login-header h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
-        .login-header p { color: var(--gray); }
-        .form-group { margin-bottom: 1.25rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; }
-        .input-wrapper { position: relative; }
-        .form-control {
-            width: 100%;
-            padding: 0.875rem 1rem 0.875rem 2.75rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-        .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1); }
-        .input-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--gray); }
-        .password-toggle { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--gray); }
-        .btn {
-            width: 100%;
-            padding: 1rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .alert {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            display: none;
-            font-size: 0.875rem;
-        }
-        .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-        
-        /* Dashboard */
-        .dashboard { display: none; min-height: 100vh; }
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: var(--sidebar-width);
-            height: 100vh;
-            background: var(--dark);
-            color: white;
-            padding: 1.5rem;
-            overflow-y: auto;
-            z-index: 1000;
-        }
-        .sidebar-header {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #334155;
-            margin-bottom: 1.5rem;
-        }
-        .sidebar-header i { font-size: 1.5rem; color: var(--primary); }
-        .sidebar-header h2 { font-size: 1.25rem; font-weight: 700; }
-        .nav-section { margin-bottom: 2rem; }
-        .nav-section-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #94a3b8;
-            margin-bottom: 0.75rem;
-            padding-left: 0.75rem;
-        }
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.875rem 0.75rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 0.25rem;
-            color: #cbd5e1;
-            text-decoration: none;
-        }
-        .nav-item:hover, .nav-item.active { background: var(--primary); color: white; }
-        .nav-item i { width: 20px; text-align: center; }
-        .sidebar-footer {
-            position: absolute;
-            bottom: 1.5rem;
-            left: 1.5rem;
-            right: 1.5rem;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: #1e293b;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: white;
-        }
-        .user-details { flex: 1; min-width: 0; }
-        .user-name { font-weight: 600; font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .user-role { font-size: 0.75rem; color: #94a3b8; }
-        .logout-btn {
-            width: 100%;
-            padding: 0.75rem;
-            background: transparent;
-            border: 1px solid #475569;
-            color: white;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .logout-btn:hover { background: #475569; }
-        
-        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
-        .top-header {
-            height: var(--header-height);
-            background: white;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .page-title h1 { font-size: 1.5rem; font-weight: 700; }
-        .page-title p { color: var(--gray); font-size: 0.875rem; }
-        .header-actions { display: flex; gap: 1rem; align-items: center; }
-        .icon-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-        .icon-btn:hover { background: #f8fafc; border-color: var(--primary); color: var(--primary); }
-        
-        .content-area { padding: 2rem; }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-        .stat-icon.blue { background: #dbeafe; color: #1e40af; }
-        .stat-icon.green { background: #d1fae5; color: #065f46; }
-        .stat-icon.orange { background: #ffedd5; color: #9a3412; }
-        .stat-icon.red { background: #fee2e2; color: #991b1b; }
-        .stat-info h3 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
-        .stat-info p { color: var(--gray); font-size: 0.875rem; }
-        
-        .card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-            overflow: hidden;
-        }
-        .card-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .card-title { font-size: 1.125rem; font-weight: 700; }
-        .card-actions { display: flex; gap: 0.75rem; }
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s;
-        }
-        .btn-primary-sm { background: var(--primary); color: white; }
-        .btn-primary-sm:hover { background: var(--primary-dark); }
-        .btn-secondary-sm { background: #f1f5f9; color: var(--dark); }
-        .btn-secondary-sm:hover { background: #e2e8f0; }
-        .btn-success-sm { background: var(--success); color: white; }
-        .btn-danger-sm { background: var(--danger); color: white; }
-        
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        th {
-            background: #f8fafc;
-            font-weight: 600;
-            font-size: 0.875rem;
-            color: var(--gray);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        tr:hover { background: #f8fafc; }
-        .status {
-            padding: 0.375rem 0.875rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); min-height: 100vh; color: var(--dark); }
+        .header { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 1rem 0; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+        .header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--dark); }
+        .logo-icon { width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.25rem; }
+        .logo-text { font-size: 1.5rem; font-weight: 800; }
+        .header-actions { display: flex; gap: 1.5rem; align-items: center; }
+        .header-link { color: var(--gray); text-decoration: none; font-weight: 500; transition: color 0.3s; }
+        .header-link:hover { color: var(--primary); }
+        .main { padding: 3rem 0; }
+        .tracking-hero { text-align: center; margin-bottom: 3rem; }
+        .tracking-hero h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; color: var(--dark); }
+        .tracking-hero p { color: var(--gray); font-size: 1.125rem; max-width: 600px; margin: 0 auto; }
+        .tracking-box { background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto 3rem; }
+        .tracking-form { display: flex; gap: 1rem; margin-bottom: 1rem; }
+        .tracking-input { flex: 1; padding: 1rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1.125rem; transition: all 0.3s; font-family: 'Courier New', monospace; letter-spacing: 1px; }
+        .tracking-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1); }
+        .btn { padding: 1rem 2rem; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3); }
+        .tracking-help { text-align: center; color: var(--gray); font-size: 0.875rem; }
+        .tracking-help a { color: var(--primary); text-decoration: none; }
+        .results { display: none; max-width: 1000px; margin: 0 auto; }
+        .results.show { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .shipment-card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem; }
+        .shipment-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid #f1f5f9; }
+        .shipment-id { font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem; }
+        .shipment-status { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.875rem; }
+        .status-in-transit { background: #dbeafe; color: #1e40af; }
         .status-delivered { background: #d1fae5; color: #065f46; }
-        .status-transit { background: #dbeafe; color: #1e40af; }
-        .status-pending { background: #fef3c7; color: #92400e; }
         .status-exception { background: #fee2e2; color: #991b1b; }
-        .tracking-id {
-            font-family: 'Courier New', monospace;
-            font-weight: 700;
-            color: var(--primary);
-            background: #fff7ed;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.875rem;
-        }
-        
-        /* Modals */
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-        .modal.show { display: flex; }
-        .modal-content {
-            background: white;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 700px;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: modalSlide 0.3s ease;
-        }
-        @keyframes modalSlide {
-            from { opacity: 0; transform: translateY(-50px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-title { font-size: 1.25rem; font-weight: 700; }
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--gray);
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-        }
-        .modal-close:hover { background: #f1f5f9; color: var(--dark); }
-        .modal-body { padding: 1.5rem; }
-        .modal-footer {
-            padding: 1.5rem;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-        }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.875rem; }
-        select.form-control, input.form-control, textarea.form-control {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-        select.form-control:focus, input.form-control:focus, textarea.form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        /* Map in modal */
-        #editMap { height: 300px; width: 100%; border-radius: 8px; margin-top: 1rem; }
-        
-        /* Timeline editor */
-        .timeline-editor { margin-top: 1rem; }
-        .timeline-item-edit {
-            background: #f8fafc;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.75rem;
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-        .timeline-item-edit input { flex: 1; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 4px; }
-        
-        /* Image showcase */
-        .image-showcase {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-        .showcase-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        @media (max-width: 1024px) {
-            .sidebar { transform: translateX(-100%); }
-            .main-content { margin-left: 0; }
-            .form-row { grid-template-columns: 1fr; }
-            .image-showcase { grid-template-columns: 1fr; }
-        }
+        .shipment-route { display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; }
+        .route-point { flex: 1; }
+        .route-label { font-size: 0.875rem; color: var(--gray); margin-bottom: 0.25rem; }
+        .route-value { font-size: 1.25rem; font-weight: 700; }
+        .route-arrow { color: var(--primary); font-size: 1.5rem; }
+        .map-container { height: 300px; border-radius: 12px; margin-bottom: 2rem; overflow: hidden; }
+        .timeline { position: relative; padding-left: 2rem; }
+        .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #e2e8f0; }
+        .timeline-item { position: relative; padding-bottom: 2rem; }
+        .timeline-item:last-child { padding-bottom: 0; }
+        .timeline-dot { position: absolute; left: -2rem; top: 0; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; transform: translateX(-5px); border: 2px solid white; box-shadow: 0 0 0 2px var(--primary); }
+        .timeline-item.completed .timeline-dot { background: var(--success); box-shadow: 0 0 0 2px var(--success); }
+        .timeline-item.current .timeline-dot { background: var(--primary); box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.3); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: translateX(-5px) scale(1); } 50% { transform: translateX(-5px) scale(1.2); } }
+        .timeline-content { background: #f8fafc; padding: 1.25rem; border-radius: 10px; margin-left: 1rem; }
+        .timeline-date { font-size: 0.875rem; color: var(--gray); margin-bottom: 0.25rem; }
+        .timeline-title { font-weight: 700; margin-bottom: 0.25rem; }
+        .timeline-location { font-size: 0.875rem; color: var(--gray); }
+        .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #f1f5f9; }
+        .detail-item h4 { font-size: 0.875rem; color: var(--gray); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .detail-item p { font-size: 1.125rem; font-weight: 600; }
+        .error-box { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 1.5rem; border-radius: 10px; text-align: center; display: none; }
+        .error-box.show { display: block; }
+        .features { padding: 4rem 0; background: white; margin-top: 3rem; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem; }
+        .feature { text-align: center; padding: 2rem; }
+        .feature-icon { width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: white; font-size: 1.5rem; }
+        .footer { background: var(--dark); color: white; padding: 3rem 0 2rem; text-align: center; }
+        .footer p { color: #94a3b8; margin-bottom: 1rem; }
+        .spinner { display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s ease-in-out infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) { .tracking-hero h1 { font-size: 1.75rem; } .tracking-form { flex-direction: column; } .shipment-header { flex-direction: column; gap: 1rem; } .shipment-route { flex-direction: column; text-align: center; } .route-arrow { transform: rotate(90deg); } }
     </style>
 </head>
 <body>
-
-    <!-- Login Screen -->
-    <div class="login-screen" id="loginScreen">
-        <div class="login-box">
-            <div class="login-header">
-                <div class="login-logo"><i class="fas fa-shipping-fast"></i></div>
-                <h1>Fastline Logistics</h1>
-                <p>Secure Admin Portal</p>
-            </div>
-            
-            <div class="alert alert-error" id="loginError"></div>
-            <div class="alert alert-success" id="loginSuccess"></div>
-            
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" class="form-control" id="email" placeholder="admin@fastline.com" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" class="form-control" id="password" placeholder="Enter password" required>
-                        <i class="fas fa-eye password-toggle" onclick="togglePassword()"></i>
-                    </div>
-                </div>
-                <button type="submit" class="btn" id="loginBtn">
-                    <i class="fas fa-sign-in-alt"></i> Sign In Securely
-                </button>
-            </form>
-            
-            <div style="margin-top: 1.5rem; text-align: center; font-size: 0.875rem; color: var(--gray);">
-                <p>Demo: admin@fastline.com / password123</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Dashboard -->
-    <div class="dashboard" id="dashboard">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <i class="fas fa-shipping-fast"></i>
-                <h2>Fastline Admin</h2>
-            </div>
-            <nav>
-                <div class="nav-section">
-                    <div class="nav-section-title">Main</div>
-                    <a href="#" class="nav-item active" onclick="showSection('dashboard')">
-                        <i class="fas fa-home"></i><span>Dashboard</span>
-                    </a>
-                    <a href="#" class="nav-item" onclick="showSection('shipments')">
-                        <i class="fas fa-box"></i><span>Shipments</span>
-                    </a>
-                    <a href="#" class="nav-item" onclick="showSection('tracking')">
-                        <i class="fas fa-map-marker-alt"></i><span>Live Tracking</span>
-                    </a>
-                    <a href="#" class="nav-item" onclick="showSection('customers')">
-                        <i class="fas fa-users"></i><span>Customers</span>
-                    </a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Operations</div>
-                    <a href="#" class="nav-item" onclick="showSection('fleet')">
-                        <i class="fas fa-truck"></i><span>Fleet</span>
-                    </a>
-                    <a href="#" class="nav-item" onclick="showSection('warehouse')">
-                        <i class="fas fa-warehouse"></i><span>Warehouse</span>
-                    </a>
-                </div>
-            </nav>
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">A</div>
-                    <div class="user-details">
-                        <div class="user-name" id="userName">Admin</div>
-                        <div class="user-role">Administrator</div>
-                    </div>
-                </div>
-                <button class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </div>
-        </aside>
-
-        <main class="main-content">
-            <header class="top-header">
-                <div class="page-title">
-                    <h1>Dashboard Overview</h1>
-                    <p id="lastUpdated">Last updated: Just now</p>
-                </div>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <div class="logo-icon"><i class="fas fa-shipping-fast"></i></div>
+                    <span class="logo-text">Fastline Logistics</span>
+                </a>
                 <div class="header-actions">
-                    <button class="icon-btn" onclick="refreshData()" title="Refresh">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button class="icon-btn" onclick="window.open('/', '_blank')" title="View Website">
-                        <i class="fas fa-external-link-alt"></i>
-                    </button>
+                    <a href="tel:+18005913278" class="header-link"><i class="fas fa-phone"></i> +1 (800) 591-FAST</a>
                 </div>
-            </header>
-
-            <div class="content-area">
-                <!-- Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon blue"><i class="fas fa-box"></i></div>
-                        <div class="stat-info"><h3 id="totalShipments">1,247</h3><p>Total Shipments</p></div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
-                        <div class="stat-info"><h3 id="deliveredToday">89</h3><p>Delivered Today</p></div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon orange"><i class="fas fa-shipping-fast"></i></div>
-                        <div class="stat-info"><h3 id="inTransit">156</h3><p>In Transit</p></div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
-                        <div class="stat-info"><h3 id="exceptions">4</h3><p>Exceptions</p></div>
-                    </div>
-                </div>
-
-                <!-- Image Showcase -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-images"></i> Company Assets</h3>
-                    </div>
-                    <div style="padding: 1.5rem;">
-                        <div class="image-showcase">
-                            <img src="Fastline Logistics team in outdoor warehouse (1).png" alt="Team" class="showcase-img">
-                            <img src="Fastline Logistics Dreamliner in flight.png" alt="Aircraft" class="showcase-img">
-                            <img src="warehouse-bg.jpg" alt="Warehouse" class="showcase-img">
-                            <img src="dasbbb.jpg" alt="Logistics Network" class="showcase-img">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Shipments Table -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Recent Shipments</h3>
-                        <div class="card-actions">
-                            <button class="btn-sm btn-secondary-sm" onclick="filterShipments()">
-                                <i class="fas fa-filter"></i> Filter
-                            </button>
-                            <button class="btn-sm btn-primary-sm" onclick="openNewShipmentModal()">
-                                <i class="fas fa-plus"></i> New Shipment
-                            </button>
-                        </div>
-                    </div>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Tracking ID</th>
-                                    <th>Customer</th>
-                                    <th>Origin</th>
-                                    <th>Destination</th>
-                                    <th>Status</th>
-                                    <th>Last Updated</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="shipmentsTable"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Edit Shipment Modal -->
-    <div class="modal" id="editShipmentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title"><i class="fas fa-edit"></i> Edit Shipment</h3>
-                <button class="modal-close" onclick="closeModal('editShipmentModal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="editShipmentForm">
-                    <input type="hidden" id="editShipmentId">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tracking ID</label>
-                            <input type="text" class="form-control" id="editTrackingId" readonly style="background: #f1f5f9;">
-                        </div>
-                        <div class="form-group">
-                            <label>Customer Name</label>
-                            <input type="text" class="form-control" id="editCustomerName" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Origin</label>
-                            <input type="text" class="form-control" id="editOrigin" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Destination</label>
-                            <input type="text" class="form-control" id="editDestination" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Status</label>
-                            <select class="form-control" id="editStatus">
-                                <option value="pending">Pending</option>
-                                <option value="picked-up">Picked Up</option>
-                                <option value="transit">In Transit</option>
-                                <option value="delivered">Delivered</option>
-                                <option value="exception">Exception</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Weight (lbs)</label>
-                            <input type="number" class="form-control" id="editWeight">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Current Location (Click map to update)</label>
-                        <div id="editMap"></div>
-                        <input type="hidden" id="editLat">
-                        <input type="hidden" id="editLng">
-                    </div>
-                    <div class="form-group">
-                        <label>Update Timeline</label>
-                        <div class="timeline-editor" id="timelineEditor">
-                            <!-- Timeline items will be added here -->
-                        </div>
-                        <button type="button" class="btn-sm btn-secondary-sm" onclick="addTimelineEntry()" style="margin-top: 0.5rem;">
-                            <i class="fas fa-plus"></i> Add Timeline Entry
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-sm btn-secondary-sm" onclick="closeModal('editShipmentModal')">Cancel</button>
-                <button class="btn-sm btn-primary-sm" onclick="saveShipmentChanges()">
-                    <i class="fas fa-save"></i> Save Changes
-                </button>
             </div>
         </div>
-    </div>
+    </header>
 
-    <!-- New Shipment Modal -->
-    <div class="modal" id="newShipmentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title"><i class="fas fa-plus"></i> Create New Shipment</h3>
-                <button class="modal-close" onclick="closeModal('newShipmentModal')">&times;</button>
+    <main class="main">
+        <div class="container">
+            <div class="tracking-hero">
+                <h1>Track Your Shipment</h1>
+                <p>Enter your tracking number to get real-time updates on your package location and delivery status.</p>
             </div>
-            <div class="modal-body">
-                <form id="newShipmentForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Customer Name *</label>
-                            <input type="text" class="form-control" id="newCustomerName" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Customer Email *</label>
-                            <input type="email" class="form-control" id="newCustomerEmail" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Origin *</label>
-                            <select class="form-control" id="newOrigin" required>
-                                <option value="">Select Origin</option>
-                                <option value="Houston, TX">Houston, TX</option>
-                                <option value="New York, NY">New York, NY</option>
-                                <option value="Los Angeles, CA">Los Angeles, CA</option>
-                                <option value="Mesa, AZ">Mesa, AZ</option>
-                                <option value="Mississauga, ON">Mississauga, ON</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Destination *</label>
-                            <input type="text" class="form-control" id="newDestination" placeholder="City, State" required>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Weight (lbs)</label>
-                            <input type="number" class="form-control" id="newWeight" placeholder="0.00">
-                        </div>
-                        <div class="form-group">
-                            <label>Service Type</label>
-                            <select class="form-control" id="newServiceType">
-                                <option value="ground">Ground Shipping</option>
-                                <option value="express">Express Delivery</option>
-                                <option value="overnight">Overnight</option>
-                                <option value="international">International</option>
-                            </select>
-                        </div>
-                    </div>
+
+            <div class="tracking-box">
+                <form class="tracking-form" onsubmit="trackShipment(event)">
+                    <input type="text" class="tracking-input" id="trackingInput" placeholder="Enter tracking number (e.g., FLT123456789)" maxlength="12" required>
+                    <button type="submit" class="btn" id="trackBtn">
+                        <span class="spinner"></span>
+                        <span class="btn-text"><i class="fas fa-search"></i> Track</span>
+                    </button>
                 </form>
+                <div class="tracking-help">
+                    <i class="fas fa-info-circle"></i> Need help? Call us at <a href="tel:+18005913278">+1 (800) 591-FAST</a>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn-sm btn-secondary-sm" onclick="closeModal('newShipmentModal')">Cancel</button>
-                <button class="btn-sm btn-primary-sm" onclick="createNewShipment()">
-                    <i class="fas fa-save"></i> Create Shipment
-                </button>
+
+            <div class="error-box" id="errorBox">
+                <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                <h3>Tracking Number Not Found</h3>
+                <p>We couldn't find any shipment with that tracking number.</p>
+            </div>
+
+            <div class="results" id="results"></div>
+        </div>
+    </main>
+
+    <section class="features">
+        <div class="container">
+            <h2 style="text-align: center; font-size: 2rem; margin-bottom: 0.5rem;">Why Track With Fastline?</h2>
+            <p style="text-align: center; color: var(--gray);">Stay informed every step of the way</p>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <h3>Real-Time Tracking</h3>
+                    <p>Know exactly where your shipment is at any moment.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-bell"></i></div>
+                    <h3>Instant Notifications</h3>
+                    <p>Get SMS and email alerts for status updates.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Secure & Private</h3>
+                    <p>Your shipment data is encrypted and protected.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon"><i class="fas fa-headset"></i></div>
+                    <h3>24/7 Support</h3>
+                    <p>Our team is available around the clock.</p>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Fastline Logistics. All rights reserved.</p>
+            <p style="font-size: 0.875rem;"><i class="fas fa-map-marker-alt"></i> 2458 Industrial Freight Drive, Houston, TX 77032</p>
+        </div>
+    </footer>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyC89RwQp0vXTSvyzCtChIZnjsPNZjLtNfk",
-            authDomain: "fastline-logistics.firebaseapp.com",
-            projectId: "fastline-logistics",
-            storageBucket: "fastline-logistics.firebasestorage.app"
+        const demoTrackingData = {
+            'FLT784521369': {
+                id: 'FLT784521369',
+                status: 'in-transit',
+                statusText: 'In Transit',
+                origin: 'Houston, TX',
+                destination: 'New York, NY',
+                service: 'Express Delivery',
+                weight: '45.5 lbs',
+                pieces: '1',
+                shipDate: 'Jan 15, 2026',
+                estDelivery: 'Jan 17, 2026 by 8:00 PM',
+                lat: 35.0,
+                lng: -90.0,
+                timeline: [
+                    { date: 'Jan 15, 2026 - 3:45 PM', title: 'Picked Up', location: 'Houston, TX - Facility', completed: true },
+                    { date: 'Jan 15, 2026 - 8:30 PM', title: 'Departed Facility', location: 'Houston, TX - Hub', completed: true },
+                    { date: 'Jan 16, 2026 - 2:15 AM', title: 'Arrived at Hub', location: 'Memphis, TN - Distribution Center', completed: true },
+                    { date: 'Jan 16, 2026 - 6:00 AM', title: 'Departed Hub', location: 'Memphis, TN - Distribution Center', completed: true },
+                    { date: 'Jan 16, 2026 - 2:30 PM', title: 'In Transit', location: 'En route to New York, NY', completed: false, current: true },
+                    { date: 'Jan 17, 2026 by 8:00 PM', title: 'Estimated Delivery', location: 'New York, NY', completed: false }
+                ]
+            }
         };
-        
-        let app, auth, db;
-        let editMap;
-        let currentShipment = null;
-        
-        try {
-            app = firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            db = firebase.firestore();
-        } catch (e) { console.error("Firebase init error:", e); }
-        
-        // Demo Data
-        let shipments = [
-            { id: 'FLT784521369', customer: 'Acme Corporation', email: 'ship@acme.com', origin: 'Houston, TX', destination: 'New York, NY', status: 'transit', updated: '2 mins ago', weight: '45.5', lat: 35.0, lng: -90.0, timeline: [{date: 'Jan 15, 3:45 PM', event: 'Picked up', location: 'Houston, TX'}] },
-            { id: 'FLT784521370', customer: 'Global Tech Inc', email: 'logistics@globaltech.com', origin: 'Los Angeles, CA', destination: 'Toronto, ON', status: 'delivered', updated: '15 mins ago', weight: '128.0', lat: 43.65, lng: -79.38, timeline: [{date: 'Jan 14, 3:45 PM', event: 'Delivered', location: 'Toronto, ON'}] },
-            { id: 'FLT784521371', customer: 'Southwest Retail', email: 'orders@swretail.com', origin: 'Mesa, AZ', destination: 'Chicago, IL', status: 'pending', updated: '1 hour ago', weight: '23.5', lat: 33.42, lng: -111.94, timeline: [{date: 'Jan 16, 10:00 AM', event: 'Order received', location: 'Mesa, AZ'}] },
-        ];
-        
-        // Login Handler
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+
+        function trackShipment(e) {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('loginBtn');
+            const input = document.getElementById('trackingInput');
+            const btn = document.getElementById('trackBtn');
+            const trackingNum = input.value.trim().toUpperCase();
             
+            if (!trackingNum) { alert('Please enter a tracking number'); return; }
+            
+            btn.querySelector('.spinner').style.display = 'inline-block';
+            btn.querySelector('.btn-text').style.display = 'none';
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
             
-            if (email === 'admin@fastline.com' && password === 'password123') {
-                setTimeout(() => {
-                    document.getElementById('loginScreen').style.display = 'none';
-                    document.getElementById('dashboard').style.display = 'block';
-                    document.getElementById('userName').textContent = email;
-                    document.getElementById('userAvatar').textContent = email.charAt(0).toUpperCase();
-                    loadShipments();
-                    updateStats();
-                }, 1000);
-            } else {
-                document.getElementById('loginError').textContent = 'Invalid credentials';
-                document.getElementById('loginError').style.display = 'block';
+            setTimeout(() => {
+                btn.querySelector('.spinner').style.display = 'none';
+                btn.querySelector('.btn-text').style.display = 'inline';
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In Securely';
-            }
-        });
-        
-        function togglePassword() {
-            const input = document.getElementById('password');
-            const icon = event.target;
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
+                
+                const data = demoTrackingData[trackingNum];
+                if (data) {
+                    displayResults(data);
+                    document.getElementById('errorBox').classList.remove('show');
+                } else {
+                    document.getElementById('results').classList.remove('show');
+                    document.getElementById('errorBox').classList.add('show');
+                }
+            }, 1500);
         }
-        
-        function logout() { location.reload(); }
-        
-        function loadShipments() {
-            const tbody = document.getElementById('shipmentsTable');
-            tbody.innerHTML = shipments.map(s => `
-                <tr>
-                    <td><span class="tracking-id">${s.id}</span></td>
-                    <td>${s.customer}</td>
-                    <td>${s.origin}</td>
-                    <td>${s.destination}</td>
-                    <td><span class="status status-${s.status}">${s.status}</span></td>
-                    <td>${s.updated}</td>
-                    <td>
-                        <button class="btn-sm btn-primary-sm" onclick="editShipment('${s.id}')" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-sm btn-success-sm" onclick="updateStatus('${s.id}')" title="Update Status" style="margin-left: 0.5rem;">
-                            <i class="fas fa-sync"></i>
-                        </button>
-                        <button class="btn-sm btn-danger-sm" onclick="deleteShipment('${s.id}')" title="Delete" style="margin-left: 0.5rem;">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-        
-        function updateStats() {
-            document.getElementById('totalShipments').textContent = shipments.length;
-            document.getElementById('deliveredToday').textContent = shipments.filter(s => s.status === 'delivered').length;
-            document.getElementById('inTransit').textContent = shipments.filter(s => s.status === 'transit').length;
-            document.getElementById('exceptions').textContent = shipments.filter(s => s.status === 'exception').length;
-        }
-        
-        function editShipment(id) {
-            currentShipment = shipments.find(s => s.id === id);
-            if (!currentShipment) return;
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
             
-            document.getElementById('editShipmentId').value = currentShipment.id;
-            document.getElementById('editTrackingId').value = currentShipment.id;
-            document.getElementById('editCustomerName').value = currentShipment.customer;
-            document.getElementById('editOrigin').value = currentShipment.origin;
-            document.getElementById('editDestination').value = currentShipment.destination;
-            document.getElementById('editStatus').value = currentShipment.status;
-            document.getElementById('editWeight').value = currentShipment.weight;
-            document.getElementById('editLat').value = currentShipment.lat || '';
-            document.getElementById('editLng').value = currentShipment.lng || '';
-            
-            // Load timeline
-            const timelineEditor = document.getElementById('timelineEditor');
-            timelineEditor.innerHTML = currentShipment.timeline.map((t, i) => `
-                <div class="timeline-item-edit">
-                    <input type="text" placeholder="Date/Time" value="${t.date}" id="timeline-date-${i}">
-                    <input type="text" placeholder="Event" value="${t.event}" id="timeline-event-${i}">
-                    <input type="text" placeholder="Location" value="${t.location}" id="timeline-loc-${i}">
-                    <button type="button" class="btn-sm btn-danger-sm" onclick="this.parentElement.remove()">
-                        <i class="fas fa-times"></i>
-                    </button>
+            const timelineHTML = data.timeline.map((event, index) => `
+                <div class="timeline-item ${event.completed ? 'completed' : ''} ${event.current ? 'current' : ''}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">${event.date}</div>
+                        <div class="timeline-title">${event.title}</div>
+                        <div class="timeline-location">${event.location}</div>
+                    </div>
                 </div>
             `).join('');
             
-            document.getElementById('editShipmentModal').classList.add('show');
+            resultsDiv.innerHTML = `
+                <div class="shipment-card">
+                    <div class="shipment-header">
+                        <div>
+                            <div class="shipment-id">${data.id}</div>
+                            <div style="color: var(--gray); font-size: 0.875rem;">${data.service} • ${data.weight} • ${data.pieces} piece${data.pieces > 1 ? 's' : ''}</div>
+                        </div>
+                        <div class="shipment-status status-${data.status}">
+                            <i class="fas fa-${data.status === 'delivered' ? 'check-circle' : data.status === 'exception' ? 'exclamation-circle' : 'truck'}"></i>
+                            ${data.statusText}
+                        </div>
+                    </div>
+                    
+                    <div class="shipment-route">
+                        <div class="route-point">
+                            <div class="route-label">From</div>
+                            <div class="route-value">${data.origin}</div>
+                        </div>
+                        <i class="fas fa-arrow-right route-arrow"></i>
+                        <div class="route-point">
+                            <div class="route-label">To</div>
+                            <div class="route-value">${data.destination}</div>
+                        </div>
+                    </div>
+                    
+                    <div id="trackingMap" class="map-container"></div>
+                    
+                    <div class="timeline">${timelineHTML}</div>
+                    
+                    <div class="details-grid">
+                        <div class="detail-item"><h4>Ship Date</h4><p>${data.shipDate}</p></div>
+                        <div class="detail-item"><h4>Estimated Delivery</h4><p style="color: var(--primary);">${data.estDelivery}</p></div>
+                        <div class="detail-item"><h4>Weight</h4><p>${data.weight}</p></div>
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.classList.add('show');
             
             // Initialize map
             setTimeout(() => {
-                if (editMap) editMap.remove();
-                editMap = L.map('editMap').setView([currentShipment.lat || 39.8283, currentShipment.lng || -98.5795], 5);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(editMap);
+                const map = L.map('trackingMap').setView([data.lat || 39.8283, data.lng || -98.5795], 6);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
                 
-                let marker = L.marker([currentShipment.lat || 39.8283, currentShipment.lng || -98.5795], {draggable: true}).addTo(editMap);
-                
-                marker.on('dragend', function(e) {
-                    const pos = e.target.getLatLng();
-                    document.getElementById('editLat').value = pos.lat;
-                    document.getElementById('editLng').value = pos.lng;
-                });
-                
-                editMap.on('click', function(e) {
-                    marker.setLatLng(e.latlng);
-                    document.getElementById('editLat').value = e.latlng.lat;
-                    document.getElementById('editLng').value = e.latlng.lng;
-                });
+                // Add origin marker
+                L.marker([29.7604, -95.3698]).addTo(map).bindPopup('Origin: Houston, TX');
+                // Add destination marker
+                L.marker([40.7128, -74.0060]).addTo(map).bindPopup('Destination: New York, NY');
+                // Add current position
+                if (data.lat && data.lng) {
+                    L.marker([data.lat, data.lng], {
+                        icon: L.divIcon({
+                            className: 'current-pos',
+                            html: '<div style="background: #FF6B35; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 3px #FF6B35;"></div>',
+                            iconSize: [20, 20]
+                        })
+                    }).addTo(map).bindPopup('Current Location');
+                    
+                    // Draw line
+                    L.polyline([[29.7604, -95.3698], [data.lat, data.lng]], {color: '#004E89', weight: 3, dashArray: '10, 10'}).addTo(map);
+                }
             }, 100);
         }
-        
-        function addTimelineEntry() {
-            const editor = document.getElementById('timelineEditor');
-            const index = editor.children.length;
-            const div = document.createElement('div');
-            div.className = 'timeline-item-edit';
-            div.innerHTML = `
-                <input type="text" placeholder="Date/Time" id="timeline-date-${index}">
-                <input type="text" placeholder="Event" id="timeline-event-${index}">
-                <input type="text" placeholder="Location" id="timeline-loc-${index}">
-                <button type="button" class="btn-sm btn-danger-sm" onclick="this.parentElement.remove()">
-                    <i class="fas fa-times"></i>
-                </button>
-            `;
-            editor.appendChild(div);
-        }
-        
-        function saveShipmentChanges() {
-            if (!currentShipment) return;
-            
-            currentShipment.customer = document.getElementById('editCustomerName').value;
-            currentShipment.origin = document.getElementById('editOrigin').value;
-            currentShipment.destination = document.getElementById('editDestination').value;
-            currentShipment.status = document.getElementById('editStatus').value;
-            currentShipment.weight = document.getElementById('editWeight').value;
-            currentShipment.lat = parseFloat(document.getElementById('editLat').value) || currentShipment.lat;
-            currentShipment.lng = parseFloat(document.getElementById('editLng').value) || currentShipment.lng;
-            currentShipment.updated = 'Just now';
-            
-            // Save timeline
-            const timelineEditor = document.getElementById('timelineEditor');
-            const items = timelineEditor.querySelectorAll('.timeline-item-edit');
-            currentShipment.timeline = Array.from(items).map((item, i) => ({
-                date: item.querySelector(`#timeline-date-${i}`).value,
-                event: item.querySelector(`#timeline-event-${i}`).value,
-                location: item.querySelector(`#timeline-loc-${i}`).value
-            }));
-            
-            loadShipments();
-            updateStats();
-            closeModal('editShipmentModal');
-            
-            // In production, save to Firebase
-            if (db) {
-                db.collection('shipments').doc(currentShipment.id).update(currentShipment);
+
+        // Check for URL parameter
+        window.addEventListener('load', () => {
+            const params = new URLSearchParams(window.location.search);
+            const tracking = params.get('tracking');
+            if (tracking) {
+                document.getElementById('trackingInput').value = tracking;
+                trackShipment({ preventDefault: () => {} });
             }
-            
-            alert('Shipment updated successfully!');
-        }
-        
-        function openNewShipmentModal() {
-            document.getElementById('newShipmentForm').reset();
-            document.getElementById('newShipmentModal').classList.add('show');
-        }
-        
-        function createNewShipment() {
-            const newShipment = {
-                id: 'FLT' + Math.floor(Math.random() * 1000000000),
-                customer: document.getElementById('newCustomerName').value,
-                email: document.getElementById('newCustomerEmail').value,
-                origin: document.getElementById('newOrigin').value,
-                destination: document.getElementById('newDestination').value,
-                status: 'pending',
-                updated: 'Just now',
-                weight: document.getElementById('newWeight').value || '0.0',
-                lat: null,
-                lng: null,
-                timeline: [{date: new Date().toLocaleString(), event: 'Order created', location: document.getElementById('newOrigin').value}]
-            };
-            
-            shipments.unshift(newShipment);
-            loadShipments();
-            updateStats();
-            closeModal('newShipmentModal');
-            alert('New shipment created: ' + newShipment.id);
-        }
-        
-        function updateStatus(id) {
-            const shipment = shipments.find(s => s.id === id);
-            const statuses = ['pending', 'picked-up', 'transit', 'delivered', 'exception'];
-            const currentIndex = statuses.indexOf(shipment.status);
-            shipment.status = statuses[(currentIndex + 1) % statuses.length];
-            shipment.updated = 'Just now';
-            loadShipments();
-            updateStats();
-        }
-        
-        function deleteShipment(id) {
-            if (confirm('Are you sure you want to delete shipment ' + id + '?')) {
-                shipments = shipments.filter(s => s.id !== id);
-                loadShipments();
-                updateStats();
-            }
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
-        }
-        
-        function filterShipments() {
-            const status = prompt('Filter by status: (pending, transit, delivered, exception)');
-            if (status) {
-                const filtered = shipments.filter(s => s.status === status);
-                alert(`Found ${filtered.length} shipments with status: ${status}`);
-            }
-        }
-        
-        function refreshData() {
-            updateStats();
-            loadShipments();
-            document.getElementById('lastUpdated').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
-        }
-        
-        function showSection(section) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            event.target.closest('.nav-item').classList.add('active');
-            if (section !== 'dashboard') {
-                alert(section + ' section - Full functionality coming soon');
-            }
-        }
-        
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.classList.remove('show');
-            }
-        }
+        });
     </script>
 </body>
 </html>'''
 
-with open('/mnt/kimi/output/admin.html', 'w') as f:
-    f.write(admin_portal)
+with open('/mnt/kimi/output/track.html', 'w') as f:
+    f.write(customer_tracking)
 
-print("✓ Admin portal with image integration and tracking editing created!")
-print("File: /mnt/kimi/output/admin.html")
-print("\nFeatures:")
-print("- Your 4 images integrated in dashboard")
-print("- Full shipment editing with map")
-print("- Timeline editor for tracking history")
-print("- Create, edit, delete shipments")
-print("- Status updates with visual map positioning")
+print("✓ Customer tracking page with live map created!")
+print("File: /mnt/kimi/output/track.html")
