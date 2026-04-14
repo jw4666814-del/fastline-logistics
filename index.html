@@ -1,6 +1,5 @@
 
 
-# Create the main website with live map
 main_website = '''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -147,7 +146,8 @@ main_website = '''<!DOCTYPE html>
                     <li><a href="#track">Track</a></li>
                     <li><a href="#services">Services</a></li>
                     <li><a href="#locations">Locations</a></li>
-                    <li><a href="#map">Live Map</a></li>
+                   <div id="map-container" style="display: none;">
+    <div id="map"></div> </div>
                 </ul>
                 <div class="nav-actions">
                     <a href="track.html" class="btn btn-outline">Track Shipment</a>
