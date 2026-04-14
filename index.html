@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fastline Logistics | Global Freight & Houston Supply Chain</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>Fastline Logistics | Global Freight & Houston Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #FF6B35;
-            --secondary: #004E89;
+            --fedex-purple: #4D148C;
+            --fedex-orange: #FF6200;
             --dark: #0A0D12;
             --card-bg: #161B22;
             --text-main: #E6EDF3;
@@ -17,38 +18,53 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Outfit', sans-serif; background-color: var(--dark); color: var(--text-main); line-height: 1.6; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--dark); color: var(--text-main); line-height: 1.6; }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
         
-        /* Navigation */
-        nav { background: rgba(10, 13, 18, 0.95); height: 80px; display: flex; align-items: center; position: fixed; width: 100%; top: 0; z-index: 1000; border-bottom: 1px solid #30363d; }
-        .nav-flex { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .logo { font-size: 1.5rem; font-weight: 800; color: #fff; text-decoration: none; }
+        /* Navigation - Enhanced with Fastline Express Menu */
+        nav { background: rgba(10, 13, 18, 0.98); border-bottom: 1px solid #30363d; position: fixed; width: 100%; top: 0; z-index: 1000; padding: 1rem 0; }
+        .nav-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-family: 'Outfit'; font-size: 1.4rem; font-weight: 800; color: #fff; text-decoration: none; }
         .logo span { color: var(--primary); }
+        
+        .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+        .nav-links a { color: var(--text-main); text-decoration: none; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; transition: 0.3s; }
+        .nav-links a:hover { color: var(--primary); }
 
-        /* Hero Section */
-        .hero { padding: 160px 0 100px; background: linear-gradient(rgba(10,13,18,0.8), rgba(10,13,18,0.8)), url('warehouse-bg.jpg'); background-size: cover; background-position: center; text-align: center; }
-        .hero h1 { font-size: 4rem; margin-bottom: 1rem; line-height: 1.1; }
-        .hero p { font-size: 1.2rem; color: var(--text-dim); margin-bottom: 2rem; }
+        /* Hero */
+        .hero { padding: 180px 0 100px; background: linear-gradient(rgba(10,13,18,0.7), rgba(10,13,18,0.9)), url('warehouse-bg.jpg'); background-size: cover; text-align: center; }
+        .hero h1 { font-family: 'Outfit'; font-size: 3.5rem; margin-bottom: 1.5rem; }
+        .hero span { color: var(--primary); }
 
-        /* Services with Your Images */
+        /* Why Ship With Us (FedEx Style Content) */
+        .fedex-section { padding: 80px 0; background: #fff; color: #000; }
+        .fedex-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; margin-top: 3rem; }
+        .fedex-card { text-align: left; }
+        .fedex-card h3 { color: var(--fedex-purple); margin-bottom: 1rem; font-family: 'Outfit'; }
+        .fedex-card i { font-size: 2rem; color: var(--fedex-orange); margin-bottom: 1rem; }
+
+        /* Services Grid */
         .section { padding: 80px 0; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
-        .card { background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid #30363d; transition: 0.3s; }
-        .card:hover { transform: translateY(-10px); border-color: var(--primary); }
-        .card-img { height: 200px; width: 100%; object-fit: cover; background: #222; }
-        .card-content { padding: 1.5rem; }
-        .card-content h3 { color: var(--primary); margin-bottom: 0.5rem; }
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        .service-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid #30363d; transition: 0.3s; }
+        .service-card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .service-img { height: 180px; width: 100%; object-fit: cover; }
+        .service-body { padding: 1.5rem; }
 
-        /* Tracking */
-        .track-bar { background: var(--card-bg); padding: 2rem; border-radius: 12px; margin-top: -50px; position: relative; z-index: 10; border: 1px solid var(--primary); display: flex; gap: 1rem; }
-        .track-bar input { flex: 1; padding: 1rem; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: white; }
-        .btn { background: var(--primary); color: white; padding: 1rem 2rem; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; text-decoration: none; }
+        /* Tracking Bar */
+        .tracking-strip { background: var(--fedex-purple); padding: 2rem 0; margin-top: -40px; position: relative; z-index: 10; border-radius: 8px; }
+        .track-flex { display: flex; gap: 1rem; max-width: 800px; margin: 0 auto; }
+        .track-flex input { flex: 1; padding: 1rem; border-radius: 4px; border: none; font-size: 1rem; }
+        .btn-track { background: var(--fedex-orange); color: white; padding: 1rem 2rem; border: none; font-weight: 700; cursor: pointer; border-radius: 4px; }
 
-        /* Footer */
-        footer { background: #0d1117; padding: 60px 0; border-top: 1px solid #30363d; margin-top: 50px; }
-        .footer-flex { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2rem; }
+        /* One Rate Section */
+        .one-rate { background: #f4f4f4; color: #000; padding: 40px; border-radius: 12px; margin: 40px 0; border-left: 8px solid var(--fedex-orange); }
+
+        footer { background: #0d1117; padding: 60px 0; border-top: 1px solid #30363d; }
+        .footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; }
+        
+        @media (max-width: 900px) { .nav-links { display: none; } .footer-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -56,78 +72,120 @@
     <nav>
         <div class="container nav-flex">
             <a href="#" class="logo">FASTLINE <span>LOGISTICS</span></a>
-            <div style="color: var(--text-dim); font-size: 0.9rem;"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> Houston HQ</div>
+            <ul class="nav-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#services">Our Services</a></li>
+                <li><a href="#quote">Request Quote</a></li>
+                <li><a href="#track">Tracking</a></li>
+                <li><a href="#news">News</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+            </ul>
         </div>
     </nav>
 
     <section class="hero">
         <div class="container">
-            <h1>Expert Shipping. <br><span>Total Reliability.</span></h1>
-            <p>Your premier logistics gateway, headquartered in Houston, Texas.</p>
-            <a href="mailto:support@fastlinelogistics.com" class="btn">Get a Quote</a>
+            <h1>Reliable Shipping. <span>Professional Rates.</span></h1>
+            <p>From Houston to the world—swift arrival, secure handling.</p>
+            <a href="#quote" class="btn-track" style="text-decoration:none; display:inline-block; margin-top:1rem;">Start Shipping Now</a>
         </div>
     </section>
 
     <div class="container">
-        <div class="track-bar">
-            <input type="text" placeholder="Enter Tracking Number (e.g. FL784521)">
-            <button class="btn">TRACK SHIPMENT</button>
+        <div class="tracking-strip" id="track">
+            <div class="track-flex">
+                <input type="text" placeholder="Enter Consignment Tracking Number...">
+                <button class="btn-track">TRACK</button>
+            </div>
         </div>
     </div>
 
-    <section class="section">
+    <section class="fedex-section" id="about">
         <div class="container">
-            <h2 style="margin-bottom: 2rem; font-size: 2rem;">Our Core Services</h2>
-            <div class="grid">
-                <div class="card">
-                    <img src="warehouse-bg.jpg" alt="Ground Shipping" class="card-img" onerror="this.src='https://via.placeholder.com/400x200?text=Ground+Shipping'">
-                    <div class="card-content">
-                        <h3>Ground Freight</h3>
-                        <p>Full-truckload and LTL services across North America with daily departures from our Houston hub.</p>
+            <h2 style="font-size: 2.5rem; text-align:center;">Why Ship with Fastline?</h2>
+            <div class="fedex-grid">
+                <div class="fedex-card">
+                    <i class="fas fa-lightbulb"></i>
+                    <h3>Innovative Solutions</h3>
+                    <p>Whether it's across states or worldwide, we prioritize the secure and swift arrival of your shipments with reliability and speed.</p>
+                </div>
+                <div class="fedex-card">
+                    <i class="fas fa-award"></i>
+                    <h3>Premium Shipping</h3>
+                    <p>Trust our professional rates and careful handling to get your items where they need to go on time, every time.</p>
+                </div>
+                <div class="fedex-card">
+                    <i class="fas fa-globe"></i>
+                    <h3>We Ship Everywhere*</h3>
+                    <p>From major cities to remote locations, your goods can reach worldwide destinations through our extensive network.</p>
+                </div>
+            </div>
+
+            <div class="one-rate">
+                <h3>Wallet-friendly shipping with no weighing</h3>
+                <p>Fastline can ship your packages for less than the Post Office. With our One Rate® program, you get flat-rate, 2-day shipping for packages up to 50 lbs.</p>
+                <small style="display:block; margin-top:10px; color:#666;">*We do not ship to locations sanctioned by the U.S. | **Visit the One Rate page for details.</small>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="services">
+        <div class="container">
+            <h2 style="margin-bottom: 3rem; font-family: 'Outfit';">Our Logistics Services</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <img src="Fastline Logistics Dreamliner in flight.png" class="service-img" alt="Air Freight" onerror="this.src='https://via.placeholder.com/400x200?text=Air+Freight'">
+                    <div class="service-body">
+                        <h3>Air Freight Services</h3>
+                        <p>Dependable air cargo logistics across Houston and internationally.</p>
                     </div>
                 </div>
-                <div class="card">
-                    <img src="Fastline Logistics Dreamliner in flight.png" alt="Air Freight" class="card-img" onerror="this.src='https://via.placeholder.com/400x200?text=Air+Freight'">
-                    <div class="card-content">
-                        <h3>Air Express</h3>
-                        <p>Global priority air cargo. We handle the paperwork, customs, and the heavy lifting.</p>
+                <div class="service-card">
+                    <img src="warehouse-bg.jpg" class="service-img" alt="Warehousing" onerror="this.src='https://via.placeholder.com/400x200?text=Warehousing'">
+                    <div class="service-body">
+                        <h3>Warehousing & Distribution</h3>
+                        <p>Secure, efficient storage tailored for global business needs.</p>
                     </div>
                 </div>
-                <div class="card">
-                    <img src="dasbbb.jpg" alt="Logistics" class="card-img" onerror="this.src='https://via.placeholder.com/400x200?text=Supply+Chain'">
-                    <div class="card-content">
-                        <h3>Supply Chain</h3>
-                        <p>End-to-end management that keeps your business moving forward 24/7.</p>
+                <div class="service-card">
+                    <img src="dasbbb.jpg" class="service-img" alt="Courier" onerror="this.src='https://via.placeholder.com/400x200?text=Courier+Services'">
+                    <div class="service-body">
+                        <h3>Courier Services</h3>
+                        <p>Same-day delivery standards maintained at the optimum quality.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="section" style="background: #0d1117;">
+    <footer id="contact">
         <div class="container">
-            <h2>Houston Headquarters</h2>
-            <p style="color: var(--text-dim);">2458 Industrial Freight Drive, Suite 120, Houston, TX 77032</p>
-            <div style="margin-top: 1rem; color: var(--primary); font-weight: bold;">
-                <i class="fas fa-phone"></i> +1 (346) 482-9175
+            <div class="footer-grid">
+                <div>
+                    <h3>FASTLINE LOGISTICS</h3>
+                    <p style="color:var(--text-dim); font-size: 0.9rem; margin-top: 1rem;">A premier logistics company based in Houston, offering a full spectrum of freight forwarding and customs solutions.</p>
+                </div>
+                <div>
+                    <h4>Quick Links</h4>
+                    <ul style="list-style:none; color:var(--text-dim); font-size:0.9rem; line-height:2;">
+                        <li>Request a Quote</li>
+                        <li>Consignment Tracking</li>
+                        <li>Events & News</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Contact Us</h4>
+                    <p style="color:var(--text-dim); font-size:0.9rem;">
+                        <i class="fas fa-envelope" style="color:var(--primary)"></i> info@fastline-express.com<br>
+                        <i class="fas fa-phone" style="color:var(--primary)"></i> +1 (346) 482-9175<br>
+                        <i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> Houston, Texas, USA
+                    </p>
+                </div>
             </div>
-        </div>
-    </section>
-
-    <footer>
-        <div class="container footer-flex">
-            <div>
-                <h3>Fastline Logistics</h3>
-                <p style="color:var(--text-dim); max-width: 300px;">Moving cargo with speed and precision from the heart of Texas.</p>
+            <div style="text-align:center; margin-top:40px; padding-top:20px; border-top:1px solid #30363d; color:#555;">
+                &copy; 2026 Fastline Logistics. All Rights Reserved.
             </div>
-            <div>
-                <h4>Contact Support</h4>
-                <p style="color:var(--text-dim);">Email: support@fastlinelogistics.com</p>
-                <p style="color:var(--text-dim);">Available 24/7 for Dispatch</p>
-            </div>
-        </div>
-        <div class="container" style="margin-top: 3rem; text-align: center; color: #30363d; font-size: 0.8rem;">
-            &copy; 2026 Fastline Logistics. All images are property of their respective owners.
         </div>
     </footer>
 
