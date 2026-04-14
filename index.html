@@ -1,81 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fastline Logistics | Global Shipping</title>
+<section class="tracking-section" id="track">
+    <div class="container">
+        <div class="tracking-widget">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+            <h3>Track Your Shipment</h3>
+            <p>Enter your tracking number to see live status.</p>
 
-<style>
-body { font-family: 'Inter', sans-serif; margin:0; background:#0F1419; color:white;}
-.container { max-width:1200px; margin:auto; padding:20px;}
-.nav { display:flex; justify-content:space-between; align-items:center; padding:15px; background:white; color:black;}
-.logo { font-weight:800; font-size:20px;}
-.hero { display:grid; grid-template-columns:1fr 1fr; gap:20px; padding:40px 0;}
-#liveMap { height:400px; border-radius:10px;}
-.btn { padding:10px 15px; background:#FF6B35; color:white; border:none; cursor:pointer;}
-input { padding:10px; width:100%; margin-bottom:10px;}
-</style>
-</head>
+            <div class="tracking-input-group">
+                <input type="text" id="trackingNumber" placeholder="Enter tracking number (e.g., FLT123456789)">
+                <button class="btn btn-primary" onclick="trackShipment()">Track</button>
+            </div>
 
-<body>
+            <!-- RESULT AREA -->
+            <div id="trackingResult" style="display:none; margin-top:20px;">
+                <h4>Status: <span style="color:green;">In Transit</span></h4>
+                <p>Estimated Delivery: 2-3 Days</p>
 
-<div class="nav">
-    <div class="logo">🚚 Fastline Logistics</div>
-    <div>
-        <a href="#track">Track</a> |
-        <a href="#services">Services</a> |
-        <a href="#locations">Locations</a>
+                <!-- MAP (HIDDEN INITIALLY) -->
+                <div id="liveMap" style="height:300px; margin-top:15px;"></div>
+            </div>
+
+        </div>
     </div>
-</div>
-
-<section class="hero">
-<div>
-    <h1>Global Logistics. Local Commitment.</h1>
-    <p>Track your shipment in real-time.</p>
-
-    <input type="text" id="trackingNumber" placeholder="Enter Tracking Number">
-    <button class="btn" onclick="trackShipment()">Track</button>
-</div>
-
-<div id="liveMap"></div>
 </section>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-function initLiveMap() {
-    const map = L.map('liveMap').setView([39.8283, -98.5795], 4);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-    .addTo(map);
-
-    const hubs = [
-        { name: "Houston", coords: [29.7604, -95.3698] },
-        { name: "New York", coords: [40.6413, -73.7781] },
-        { name: "Los Angeles", coords: [33.9416, -118.4085] }
-    ];
-
-    hubs.forEach(hub => {
-        L.marker(hub.coords).addTo(map)
-        .bindPopup(hub.name);
-    });
-}
-
-window.onload = initLiveMap;
-
-function trackShipment() {
-    const num = document.getElementById("trackingNumber").value;
-    if(num){
-        alert("Tracking: " + num);
-    } else {
-        alert("Enter tracking number");
-    }
-}
-</script>
-
-</body>
-</html>
