@@ -1,24 +1,125 @@
-<section class="tracking-section" id="track">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fastline Logistics | Global Shipping & Freight Solutions</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        /* KEEPING YOUR ORIGINAL STYLE */
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E85A2B;
+            --secondary: #004E89;
+            --accent: #1A659E;
+            --dark: #0F1419;
+            --light: #F8F9FA;
+            --gray: #6C757D;
+            --success: #28A745;
+            --white: #FFFFFF;
+        }
+        body { font-family: 'Inter', sans-serif; margin:0; }
+        .container { max-width:1200px; margin:auto; padding:20px;}
+        #liveMap { height:400px; display:none; } /* 👈 hidden by default */
+    </style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav class="main-nav">
     <div class="container">
-        <div class="tracking-widget">
+        <div class="nav-content">
+            <span><b>Fastline Logistics</b></span>
 
-            <h3>Track Your Shipment</h3>
-            <p>Enter your tracking number to see live status.</p>
+            <ul class="nav-links">
+                <li><a href="#track">Track</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#locations">Locations</a></li>
+            </ul>
 
-            <div class="tracking-input-group">
-                <input type="text" id="trackingNumber" placeholder="Enter tracking number (e.g., FLT123456789)">
-                <button class="btn btn-primary" onclick="trackShipment()">Track</button>
+            <div>
+                <a href="track.html">Track Shipment</a>
             </div>
-
-            <!-- RESULT AREA -->
-            <div id="trackingResult" style="display:none; margin-top:20px;">
-                <h4>Status: <span style="color:green;">In Transit</span></h4>
-                <p>Estimated Delivery: 2-3 Days</p>
-
-                <!-- MAP (HIDDEN INITIALLY) -->
-                <div id="liveMap" style="height:300px; margin-top:15px;"></div>
-            </div>
-
         </div>
     </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <h1>Global Logistics. Local Commitment.</h1>
+        <p>Track your shipments in real-time across our network.</p>
+
+        <!-- MAP (HIDDEN INITIALLY) -->
+        <div id="liveMap"></div>
+    </div>
 </section>
+
+<!-- TRACKING -->
+<section id="track">
+    <div class="container">
+        <h2>Track Shipment</h2>
+
+        <input type="text" id="trackingNumber" placeholder="Enter tracking number">
+        <button onclick="trackShipment()">Track</button>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="container">
+        <p>© 2001 Fastline Logistics</p>
+    </div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+let mapInitialized = false;
+
+function trackShipment() {
+    const trackingNum = document.getElementById('trackingNumber').value.trim();
+
+    if (!trackingNum) {
+        alert('Please enter a tracking number');
+        return;
+    }
+
+    // SHOW MAP ONLY AFTER TRACKING
+    const mapDiv = document.getElementById('liveMap');
+    mapDiv.style.display = 'block';
+
+    if (!mapInitialized) {
+        initLiveMap();
+        mapInitialized = true;
+    }
+
+    // Keep your redirect
+    window.location.href = `track.html?tracking=${encodeURIComponent(trackingNum)}`;
+}
+
+function initLiveMap() {
+    const map = L.map('liveMap').setView([39.8283, -98.5795], 4);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+    .addTo(map);
+
+    const route = [
+        [29.7604, -95.3698],
+        [40.7128, -74.0060]
+    ];
+
+    L.polyline(route).addTo(map);
+
+    L.marker(route[0]).addTo(map).bindPopup("Origin");
+    L.marker(route[1]).addTo(map).bindPopup("Destination");
+}
+</script>
+
+</body>
+</html>
