@@ -197,6 +197,11 @@ customer_tracking = '''<!DOCTYPE html>
         };
 
         function trackShipment(e) {
+            const trackingNumber = document.getElementById('tracking-input').value;
+    
+    if (trackingNumber !== "") {
+        // Show the map container when tracking starts
+        document.getElementById('map-container').style.display = 'block';
             e.preventDefault();
             const input = document.getElementById('trackingInput');
             const btn = document.getElementById('trackBtn');
